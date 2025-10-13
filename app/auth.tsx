@@ -166,7 +166,7 @@ export default function AuthScreen() {
             {error && <Text className="text-red-500 text-sm mb-4 text-center">{error}</Text>}
 
             <TouchableOpacity
-              className="bg-blue-500 px-4 py-3 rounded-lg items-center mb-4"
+              className="bg-app-primary px-4 py-3 rounded-lg items-center mb-4"
               onPress={handleEmailAuth}
               disabled={isLoading}
             >
@@ -199,7 +199,7 @@ export default function AuthScreen() {
 
           <View className="items-center">
             <TouchableOpacity onPress={toggleMode} disabled={isLoading}>
-              <Text className="text-blue-500 text-sm underline">
+              <Text className="text-app-primary text-sm underline">
                 {isSignUp
                   ? 'すでにアカウントをお持ちですか？ ログイン'
                   : 'アカウントをお持ちでない方はこちら'}

@@ -6,11 +6,23 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Timinkブランドカラー
+        brand: {
+          blue: '#5C73E6', // メインブルー（グラデーション左上）
+          purple: '#A164E6', // メインパープル（グラデーション右下）
+          primary: '#6C6EE6', // プライマリカラー（青と紫の中間）
+          accent: '#F4C15C', // アクセントイエロー（砂時計の砂）
+        },
         // アプリ専用カスタムカラー
         'app-primary': {
-          DEFAULT: '#3B82F6', // Blue-500
-          light: '#DBEAFE', // Blue-100
-          dark: '#1E40AF', // Blue-800
+          DEFAULT: '#6C6EE6', // ブランドプライマリカラー
+          light: '#E0E2FB', // 薄い紫青
+          dark: '#4A4DB8', // 濃い紫青
+        },
+        'app-accent': {
+          DEFAULT: '#F4C15C', // アクセントイエロー
+          light: '#FDF3E0', // 薄いイエロー
+          dark: '#D9A640', // 濃いイエロー
         },
         'app-success': {
           DEFAULT: '#10B981', // Green-500
@@ -32,21 +44,6 @@ module.exports = {
           light: '#E0E7FF', // Indigo-100
           dark: '#4338CA', // Indigo-700
         },
-        'app-purple': {
-          DEFAULT: '#8B5CF6', // Purple-500
-          light: '#EDE9FE', // Purple-100
-          dark: '#7C3AED', // Purple-600
-        },
-        'app-orange': {
-          DEFAULT: '#F97316', // Orange-500
-          light: '#FED7AA', // Orange-100
-          dark: '#EA580C', // Orange-600
-        },
-        'app-yellow': {
-          DEFAULT: '#EAB308', // Yellow-500
-          light: '#FEF3C7', // Yellow-100
-          dark: '#CA8A04', // Yellow-600
-        },
         // ニュートラルカラー
         'app-neutral': {
           50: '#F9FAFB',
@@ -60,6 +57,11 @@ module.exports = {
           800: '#1F2937',
           900: '#111827',
         },
+        'app-white': '#FFFFFF',
+        'app-light-gray': '#EAEAEA',
+      },
+      backgroundImage: {
+        'brand-gradient': 'linear-gradient(135deg, #5C73E6 0%, #A164E6 100%)',
       },
     },
   },

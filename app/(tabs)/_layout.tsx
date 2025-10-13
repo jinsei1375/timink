@@ -1,19 +1,18 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#6C6EE6', // ブランドプライマリカラー
+        tabBarInactiveTintColor: '#9CA3AF', // グレー
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background,
+          backgroundColor: '#FFFFFF',
           height: 60,
+          borderTopWidth: 1,
+          borderTopColor: '#EAEAEA',
         },
       }}
     >
