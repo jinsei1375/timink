@@ -27,14 +27,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="diaries"
         options={{
-          title: '交換日記一覧',
+          title: '交換日記',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="capsules"
         options={{
-          title: 'タイムカプセル一覧',
+          title: 'タイムカプセル',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="hourglass.fill" color={color} />,
         }}
       />

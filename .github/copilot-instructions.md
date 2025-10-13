@@ -4,6 +4,28 @@
 
 - 「タイムカプセル × 交換日記」＝“時間の制約が絆を深めるSNS”
 
+## レイヤー分離アーキテクチャ
+
+```
+app/                    # Expo Router画面
+├─ components/          # UIコンポーネント
+├─ services/           # データアクセス層
+├─ hooks/              # ビジネスロジック
+├─ utils/              # 純粋関数
+├─ stores/             # 状態管理
+└─ contexts/           # React Context
+└─ types/              # 型定義
+```
+
+### サービス層パターン (`services/supabaseService.ts`)
+
+全てのデータベース操作は`SupabaseService`クラスに集約：
+
+## スタイル
+
+- Tailwind CSS +
+- 基本的にはクラス名でスタイリング
+
 ## 機能
 
 - タイムカプセル

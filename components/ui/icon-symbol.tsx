@@ -17,6 +17,8 @@ const MAPPING = {
   'book.fill': 'book',
   'hourglass.fill': 'hourglass-full',
   'person.fill': 'person',
+  globe: 'public',
+  google: 'login',
 } as const;
 
 type IconMapping = typeof MAPPING;

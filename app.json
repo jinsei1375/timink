@@ -37,6 +37,9 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "expo-router": {
+      "unstable_src": "app"
     }
   }
 }
