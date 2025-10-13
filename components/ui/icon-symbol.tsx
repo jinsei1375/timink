@@ -17,6 +17,8 @@ const MAPPING = {
   'book.fill': 'book',
   'hourglass.fill': 'hourglass-full',
   'person.fill': 'person',
+  'person.badge.plus': 'person-add',
+  'person.2': 'people',
   globe: 'public',
   google: 'login',
 } as const;

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { Profile, SignInData, SignUpData } from '@/types/index';
+import { generateUserId } from '@/utils/generateUserId';
 import { AuthError, AuthResponse, User } from '@supabase/supabase-js';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -98,8 +99,11 @@ export class AuthService {
    * プロフィール作成
    */
   static async createProfile(userId: string, displayName: string | null): Promise<void> {
+    const userIdString = generateUserId();
+
     const { error } = await supabase.from('profiles').insert({
       id: userId,
+      user_id: userIdString,
       display_name: displayName,
       avatar_url: null,
       bio: null,
@@ -133,19 +137,28 @@ export class AuthService {
    * プロフィール更新
    */
   static async updateProfile(userId: string, updates: Partial<Profile>): Promise<Profile> {
+    const updateData: any = {
+      updated_at: new Date().toISOString(),
+    };
+
+    // 更新するフィールドのみを含める
+    if (updates.display_name !== undefined) updateData.display_name = updates.display_name;
+    if (updates.avatar_url !== undefined) updateData.avatar_url = updates.avatar_url;
+    if (updates.bio !== undefined) updateData.bio = updates.bio;
+    if (updates.user_id !== undefined) updateData.user_id = updates.user_id;
+
     const { data, error } = await supabase
       .from('profiles')
-      .update({
-        display_name: updates.display_name,
-        avatar_url: updates.avatar_url,
-        bio: updates.bio,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', userId)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ プロフィール更新エラー:', error);
+      throw error;
+    }
+
     return data;
   }
 
