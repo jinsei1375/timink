@@ -73,7 +73,6 @@ function RootLayoutContent() {
       <View className="flex-1" pointerEvents="auto">
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
           <Stack.Screen name="auth" options={{ headerShown: false }} />
         </Stack>
       </View>
