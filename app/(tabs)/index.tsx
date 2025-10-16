@@ -80,14 +80,9 @@ export default function HomeScreen() {
       {/* ヘッダー */}
       <View className="px-6 pt-8 pb-4 border-b border-gray-200">
         <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-bold text-gray-800">ホーム</Text>
-            <Text className="text-sm text-gray-500 mt-1">
-              ようこそ、{profile?.display_name || 'ゲスト'}さん
-            </Text>
-          </View>
+          <View></View>
           <TouchableOpacity
-            onPress={() => router.push('/friends/add' as any)}
+            onPress={() => router.push('/(tabs)/add-friend')}
             className="bg-app-primary px-4 py-2 rounded-lg flex-row items-center"
           >
             <IconSymbol name="person.badge.plus" size={20} color="#fff" />
@@ -149,7 +144,7 @@ export default function HomeScreen() {
                     友達を追加して交換日記を始めましょう
                   </Text>
                   <TouchableOpacity
-                    onPress={() => router.push('/friends/add' as any)}
+                    onPress={() => router.push('/(tabs)/add-friend')}
                     className="bg-app-primary px-6 py-3 rounded-lg mt-4"
                   >
                     <Text className="text-white font-semibold">友達を追加</Text>
