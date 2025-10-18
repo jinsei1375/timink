@@ -1,9 +1,11 @@
+import { EmptyState } from '@/components/diary/EmptyState';
+import { FriendSelectItem } from '@/components/diary/FriendSelectItem';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { DiaryService } from '@/services/diaryService';
 import { FriendService } from '@/services/friendService';
 import { Friend } from '@/types';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -37,15 +39,13 @@ export default function CreateDiaryScreen() {
     }
   };
 
-  const toggleFriendSelection = (friendId: string) => {
-    if (selectedFriends.includes(friendId)) {
-      setSelectedFriends(selectedFriends.filter((id) => id !== friendId));
-    } else {
-      setSelectedFriends([...selectedFriends, friendId]);
-    }
-  };
+  const toggleFriendSelection = useCallback((friendId: string) => {
+    setSelectedFriends((prev) =>
+      prev.includes(friendId) ? prev.filter((id) => id !== friendId) : [...prev, friendId]
+    );
+  }, []);
 
-  const handleCreate = async () => {
+  const handleCreate = useCallback(async () => {
     if (!title.trim()) {
       Alert.alert('エラー', 'タイトルを入力してください');
       return;
@@ -77,37 +77,32 @@ export default function CreateDiaryScreen() {
     } finally {
       setIsCreating(false);
     }
-  };
+  }, [title, selectedFriends, router]);
 
-  const renderFriendItem = ({ item }: { item: Friend }) => {
-    const isSelected = selectedFriends.includes(item.profile.id);
+  const renderFriendItem = useCallback(
+    ({ item }: { item: Friend }) => {
+      const isSelected = selectedFriends.includes(item.profile.id);
+      return (
+        <FriendSelectItem friend={item} isSelected={isSelected} onToggle={toggleFriendSelection} />
+      );
+    },
+    [selectedFriends, toggleFriendSelection]
+  );
 
-    return (
-      <TouchableOpacity
-        onPress={() => toggleFriendSelection(item.profile.id)}
-        className={`flex-row items-center p-4 mb-2 rounded-xl ${
-          isSelected ? 'bg-purple-50 border-2 border-app-primary' : 'bg-gray-50'
-        }`}
-      >
-        <View
-          className={`w-12 h-12 rounded-full items-center justify-center mr-3 ${
-            isSelected ? 'bg-app-primary' : 'bg-gray-300'
-          }`}
-        >
-          <Text className="text-white text-lg font-bold">
-            {item.profile.display_name?.charAt(0) || '?'}
-          </Text>
-        </View>
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-800">
-            {item.profile.display_name || '名前なし'}
-          </Text>
-          <Text className="text-sm text-gray-500">@{item.profile.user_id}</Text>
-        </View>
-        {isSelected && <IconSymbol name="chevron.right" size={20} color="#6C6EE6" />}
-      </TouchableOpacity>
-    );
-  };
+  const keyExtractor = useCallback((item: Friend) => item.id, []);
+
+  const renderEmptyState = useCallback(
+    () => (
+      <EmptyState
+        icon="person.2"
+        title="友達がいません"
+        description="まず友達を追加してください"
+        actionLabel="友達を追加"
+        onAction={() => router.push('/(tabs)/add-friend')}
+      />
+    ),
+    [router]
+  );
 
   if (isLoading) {
     return (
@@ -171,18 +166,12 @@ export default function CreateDiaryScreen() {
           </Text>
 
           {friends.length === 0 ? (
-            <View className="flex-1 items-center justify-center">
-              <IconSymbol name="person.2" size={48} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-4 text-center">友達がいません</Text>
-              <Text className="text-gray-400 text-sm mt-2 text-center">
-                まず友達を追加してください
-              </Text>
-            </View>
+            renderEmptyState()
           ) : (
             <FlatList
               data={friends}
               renderItem={renderFriendItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={keyExtractor}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 20 }}
             />
