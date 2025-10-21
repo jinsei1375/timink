@@ -12,6 +12,9 @@ import {
   Animated,
   Dimensions,
   FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   RefreshControl,
   Text,
   TouchableOpacity,
@@ -279,73 +282,85 @@ export default function DiaryDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gradient-to-b from-gray-100 to-gray-50">
-      {/* 新しいエントリー通知 */}
-      {newEntryNotification && (
-        <View className="absolute top-16 left-0 right-0 z-50 items-center">
-          <View className="bg-app-primary px-6 py-3 rounded-full shadow-lg">
-            <Text className="text-white font-semibold">{newEntryNotification}</Text>
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <View className="flex-1 bg-gradient-to-b from-gray-100 to-gray-50">
+        {/* 新しいエントリー通知 */}
+        {newEntryNotification && (
+          <View className="absolute top-16 left-0 right-0 z-50 items-center">
+            <View className="bg-app-primary px-6 py-3 rounded-full shadow-lg">
+              <Text className="text-white font-semibold">{newEntryNotification}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* ヘッダー */}
+        <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
+          <View className="flex-row items-center">
+            <TouchableOpacity onPress={() => router.back()} className="mr-3">
+              <IconSymbol
+                name="chevron.right"
+                size={24}
+                color="#6C6EE6"
+                style={{ transform: [{ rotate: '180deg' }] }}
+              />
+            </TouchableOpacity>
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-gray-800">{diary.title}</Text>
+              {entries.length > 0 && (
+                <Text className="text-sm text-gray-500 mt-1">
+                  📖 {entries.length}ページの思い出
+                </Text>
+              )}
+            </View>
           </View>
         </View>
-      )}
 
-      {/* ヘッダー */}
-      <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
-        <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
-            <IconSymbol
-              name="chevron.right"
-              size={24}
-              color="#6C6EE6"
-              style={{ transform: [{ rotate: '180deg' }] }}
-            />
-          </TouchableOpacity>
+        {/* ページビュー（横スクロール） */}
+        {entries.length === 0 ? (
+          renderEmptyState()
+        ) : (
           <View className="flex-1">
-            <Text className="text-2xl font-bold text-gray-800">{diary.title}</Text>
-            {entries.length > 0 && (
-              <Text className="text-sm text-gray-500 mt-1">📖 {entries.length}ページの思い出</Text>
-            )}
+            <Animated.FlatList
+              ref={flatListRef}
+              data={entries}
+              renderItem={renderPage}
+              keyExtractor={keyExtractor}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              snapToAlignment="center"
+              decelerationRate="fast"
+              scrollEventThrottle={16}
+              keyboardShouldPersistTaps="handled"
+              onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+                useNativeDriver: true,
+              })}
+              onScrollBeginDrag={() => Keyboard.dismiss()}
+              getItemLayout={(data, index) => ({
+                length: SCREEN_WIDTH,
+                offset: SCREEN_WIDTH * index,
+                index,
+              })}
+              contentContainerStyle={{ flexGrow: 1 }}
+              refreshControl={
+                <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+              }
+            />
           </View>
-        </View>
+        )}
+
+        {/* 投稿フォーム */}
+        <DiaryPostForm
+          onSubmit={handlePost}
+          canPost={canPost}
+          nextPostTime={nextPostTime}
+          maxLength={500}
+        />
       </View>
-
-      {/* ページビュー（横スクロール） */}
-      {entries.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <View className="flex-1">
-          <Animated.FlatList
-            ref={flatListRef}
-            data={entries}
-            renderItem={renderPage}
-            keyExtractor={keyExtractor}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            snapToAlignment="center"
-            decelerationRate="fast"
-            scrollEventThrottle={16}
-            onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
-              useNativeDriver: true,
-            })}
-            getItemLayout={(data, index) => ({
-              length: SCREEN_WIDTH,
-              offset: SCREEN_WIDTH * index,
-              index,
-            })}
-            contentContainerStyle={{ flexGrow: 1 }}
-            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
-          />
-        </View>
-      )}
-
-      {/* 投稿フォーム */}
-      <DiaryPostForm
-        onSubmit={handlePost}
-        canPost={canPost}
-        nextPostTime={nextPostTime}
-        maxLength={500}
-      />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

@@ -40,7 +40,11 @@ export const DiaryPageView = React.memo<DiaryPageViewProps>(
           </View>
 
           {/* 日記コンテンツ */}
-          <ScrollView className="flex-1 px-6 py-6" showsVerticalScrollIndicator={false}>
+          <ScrollView
+            className="flex-1 px-6 py-6"
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
             {/* ヘッダー: 日付と著者 */}
             <View className="flex-row items-center justify-between mb-6 pb-4 border-b border-dashed border-gray-300">
               <View className="flex-row items-center flex-1">
