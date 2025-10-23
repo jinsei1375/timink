@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
-import { DiaryEntry, Profile } from '@/types';
+import { NotificationService } from '@/services/notificationService';
+import type { DiaryEntry, Profile } from '@/types';
 
 // 交換日記と最新エントリー、メンバー情報を含む型
 export interface DiaryWithDetails {
@@ -261,6 +262,20 @@ export class DiaryService {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('認証が必要です');
 
+      // ユーザープロフィール取得
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .single();
+
+      // 日記情報取得
+      const { data: diary } = await supabase
+        .from('diaries')
+        .select('title')
+        .eq('id', diaryId)
+        .single();
+
       const { data, error } = await supabase
         .from('diary_entries')
         .insert({
@@ -279,6 +294,15 @@ export class DiaryService {
         .from('diaries')
         .update({ updated_at: new Date().toISOString() })
         .eq('id', diaryId);
+
+      // 通知を送信（バックグラウンドで実行）
+      if (profile && diary) {
+        NotificationService.sendDiaryEntryNotification(
+          diaryId,
+          profile.display_name || 'メンバー',
+          diary.title
+        ).catch((err) => console.error('通知送信エラー:', err));
+      }
 
       return { success: true, data, error: null };
     } catch (error: any) {

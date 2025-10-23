@@ -32,6 +32,15 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#6C6EE6",
+          "sounds": [],
+          "mode": "production"
+        }
       ]
     ],
     "experiments": {
@@ -40,6 +49,13 @@
     },
     "expo-router": {
       "unstable_src": "app"
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "870b6d3d-c4e5-4978-9e13-0b082eabae7e"
+      }
+    },
+    "owner": "shinsei1118"
   }
 }

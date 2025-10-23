@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { AuthService } from '@/services/authService';
+import { NotificationService } from '@/services/notificationService';
 import { AuthState, Profile } from '@/types/index';
 import { User } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -64,6 +65,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!profile && user.user_metadata?.display_name) {
         await AuthService.createProfile(user.id, user.user_metadata.display_name);
         profile = await AuthService.getProfile(user.id);
+      }
+
+      // プッシュ通知トークンを登録
+      try {
+        const expoPushToken = await NotificationService.registerForPushNotificationsAsync();
+        if (expoPushToken) {
+          await NotificationService.saveExpoPushToken(user.id, expoPushToken);
+        }
+      } catch (notifError) {
+        console.error('通知トークン登録エラー:', notifError);
+        // 通知トークンの登録に失敗してもログイン処理は続行
       }
 
       setState({

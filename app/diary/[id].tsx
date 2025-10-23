@@ -47,7 +47,6 @@ export default function DiaryDetailScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [canPost, setCanPost] = useState(false);
   const [nextPostTime, setNextPostTime] = useState<Date | null>(null);
-  const [newEntryNotification, setNewEntryNotification] = useState<string | null>(null);
 
   const loadDiaryData = async () => {
     if (!id) return;
@@ -99,12 +98,6 @@ export default function DiaryDetailScreen() {
           if (existingIds.has(newEntry.id)) return prev;
           return [...prev, newEntry];
         });
-
-        // 自分の投稿でない場合、通知を表示
-        if (newEntry.author_id !== profile?.id) {
-          setNewEntryNotification(`${newEntry.author.display_name || '誰か'}が投稿しました`);
-          setTimeout(() => setNewEntryNotification(null), 3000);
-        }
 
         // 投稿可能状態を再チェック
         DiaryService.canPostToday(id).then((canPostToday) => {
@@ -288,15 +281,6 @@ export default function DiaryDetailScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <View className="flex-1 bg-gradient-to-b from-gray-100 to-gray-50">
-        {/* 新しいエントリー通知 */}
-        {newEntryNotification && (
-          <View className="absolute top-16 left-0 right-0 z-50 items-center">
-            <View className="bg-app-primary px-6 py-3 rounded-full shadow-lg">
-              <Text className="text-white font-semibold">{newEntryNotification}</Text>
-            </View>
-          </View>
-        )}
-
         {/* ヘッダー */}
         <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
           <View className="flex-row items-center">
