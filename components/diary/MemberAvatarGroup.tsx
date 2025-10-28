@@ -1,3 +1,4 @@
+import { Avatar } from '@/components/ui/Avatar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Profile } from '@/types';
 import React from 'react';
@@ -10,9 +11,9 @@ interface MemberAvatarGroupProps {
 }
 
 const SIZE_CONFIG = {
-  small: { size: 'w-8 h-8', text: 'text-xs', spacing: '-space-x-1.5' },
-  medium: { size: 'w-10 h-10', text: 'text-sm', spacing: '-space-x-2' },
-  large: { size: 'w-12 h-12', text: 'text-base', spacing: '-space-x-2.5' },
+  small: { size: 32, spacing: '-space-x-1.5' },
+  medium: { size: 40, spacing: '-space-x-2' },
+  large: { size: 48, spacing: '-space-x-2.5' },
 };
 
 /**
@@ -26,7 +27,10 @@ export const MemberAvatarGroup = React.memo<MemberAvatarGroupProps>(
 
     if (members.length === 0) {
       return (
-        <View className={`${config.size} rounded-full bg-gray-200 items-center justify-center`}>
+        <View
+          style={{ width: config.size, height: config.size }}
+          className="rounded-full bg-gray-200 items-center justify-center"
+        >
           <IconSymbol name="person.fill" size={16} color="#9CA3AF" />
         </View>
       );
@@ -37,20 +41,22 @@ export const MemberAvatarGroup = React.memo<MemberAvatarGroupProps>(
         {displayMembers.map((member, index) => (
           <View
             key={member.id}
-            className={`${config.size} rounded-full bg-app-primary items-center justify-center border-2 border-white`}
             style={{ zIndex: 10 - index }}
+            className="border-2 border-white rounded-full"
           >
-            <Text className={`text-white font-bold ${config.text}`}>
-              {member.display_name?.charAt(0) || '?'}
-            </Text>
+            <Avatar uri={member.avatar_url} size={config.size} />
           </View>
         ))}
         {remainingCount > 0 && (
           <View
-            className={`${config.size} rounded-full bg-gray-300 items-center justify-center border-2 border-white`}
-            style={{ zIndex: 0 }}
+            style={{
+              width: config.size,
+              height: config.size,
+              zIndex: 0,
+            }}
+            className="rounded-full bg-gray-300 items-center justify-center border-2 border-white"
           >
-            <Text className={`text-gray-600 font-bold ${config.text}`}>+{remainingCount}</Text>
+            <Text className="text-gray-600 font-bold text-sm">+{remainingCount}</Text>
           </View>
         )}
       </View>

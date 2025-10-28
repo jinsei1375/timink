@@ -1,3 +1,4 @@
+import { Avatar } from '@/components/ui/Avatar';
 import { Friend } from '@/types';
 import React, { useCallback } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -26,15 +27,7 @@ export const FriendSelectItem = React.memo<FriendSelectItemProps>(
         }`}
         activeOpacity={0.7}
       >
-        <View
-          className={`w-12 h-12 rounded-full items-center justify-center mr-3 ${
-            isSelected ? 'bg-app-primary' : 'bg-gray-300'
-          }`}
-        >
-          <Text className="text-white text-lg font-bold">
-            {friend.profile.display_name?.charAt(0) || '?'}
-          </Text>
-        </View>
+        <Avatar uri={friend.profile.avatar_url} size={48} className="mr-3" />
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-800">
             {friend.profile.display_name || '名前なし'}

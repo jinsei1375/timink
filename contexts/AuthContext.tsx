@@ -11,6 +11,7 @@ interface AuthContextType extends AuthState {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -125,6 +126,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const refreshProfile = async () => {
+    if (!state.user) throw new Error('ユーザーがログインしていません');
+
+    const profile = await AuthService.getProfile(state.user.id);
+    setState((prev) => ({
+      ...prev,
+      profile,
+    }));
+  };
+
   const value: AuthContextType = {
     ...state,
     signUp,
@@ -132,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithGoogle,
     signOut,
     updateProfile,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

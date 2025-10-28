@@ -1,12 +1,16 @@
+import { Avatar } from '@/components/ui/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { StorageService } from '@/services/storageService';
+import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileScreen() {
-  const { user, profile, signOut, updateProfile } = useAuth();
+  const { user, profile, signOut, updateProfile, refreshProfile } = useAuth();
   const [isEditingUserId, setIsEditingUserId] = useState(false);
   const [newUserId, setNewUserId] = useState(profile?.user_id || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const handleSignOut = () => {
     Alert.alert('ログアウト', 'ログアウトしますか？', [
@@ -55,10 +59,78 @@ export default function ProfileScreen() {
     }
   };
 
+  /**
+   * 画像ピッカーを開いてアバターを変更
+   */
+  const handleChangeAvatar = async () => {
+    if (!user) return;
+
+    try {
+      // パーミッションをリクエスト
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert('権限が必要です', '写真ライブラリへのアクセス権限を許可してください。');
+        return;
+      }
+
+      // 画像を選択
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets[0]) return;
+
+      // アップロード開始
+      setIsUploadingAvatar(true);
+
+      const newAvatarUrl = await StorageService.updateAvatar(
+        user.id,
+        result.assets[0].uri,
+        profile?.avatar_url || null
+      );
+
+      // プロフィールを再取得して最新の状態に
+      await refreshProfile();
+
+      Alert.alert('成功', 'プロフィール画像を更新しました。');
+    } catch (error) {
+      console.error('Error changing avatar:', error);
+      Alert.alert('エラー', 'プロフィール画像の更新に失敗しました。');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   return (
     <View className="flex-1 bg-white p-6">
       <View className="items-center mt-8">
-        <Text className="text-2xl font-bold text-gray-800">プロフィール</Text>
+        {/* アバター */}
+        <View className="relative">
+          <Avatar uri={profile?.avatar_url} size={100} />
+          {isUploadingAvatar && (
+            <View className="absolute inset-0 bg-black/50 rounded-full items-center justify-center">
+              <ActivityIndicator color="white" size="large" />
+            </View>
+          )}
+        </View>
+
+        <TouchableOpacity
+          onPress={handleChangeAvatar}
+          disabled={isUploadingAvatar}
+          className={`mt-4 px-4 py-2 rounded-lg ${
+            isUploadingAvatar ? 'bg-gray-400' : 'bg-blue-500'
+          }`}
+        >
+          <Text className="text-white font-semibold">
+            {isUploadingAvatar ? 'アップロード中...' : '画像を変更'}
+          </Text>
+        </TouchableOpacity>
+
+        <Text className="text-2xl font-bold text-gray-800 mt-4">プロフィール</Text>
 
         <View className="mt-8 w-full">
           <View className="bg-gray-50 p-4 rounded-lg mb-4">

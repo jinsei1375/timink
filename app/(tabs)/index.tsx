@@ -1,3 +1,4 @@
+import { Avatar } from '@/components/ui/Avatar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/contexts/AuthContext';
 import { FriendService } from '@/services/friendService';
@@ -156,11 +157,7 @@ export default function HomeScreen() {
                     key={friend.id}
                     className="bg-gray-50 rounded-lg p-4 mb-2 flex-row items-center"
                   >
-                    <View className="w-12 h-12 bg-app-primary rounded-full items-center justify-center mr-3">
-                      <Text className="text-white text-xl font-bold">
-                        {friend.profile.display_name?.charAt(0) || '?'}
-                      </Text>
-                    </View>
+                    <Avatar uri={friend.profile.avatar_url} size={48} className="mr-3" />
                     <View className="flex-1">
                       <Text className="text-base font-semibold text-gray-800">
                         {friend.profile.display_name || '名前なし'}
