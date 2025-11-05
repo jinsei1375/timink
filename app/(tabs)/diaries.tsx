@@ -3,6 +3,7 @@ import { EmptyState } from '@/components/diary/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { DiaryService, DiaryWithDetails } from '@/services/diaryService';
 import { formatDate } from '@/utils/formatDate';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -96,12 +97,12 @@ export default function DiariesScreen() {
       {/* ヘッダー */}
       <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
         <View className="flex-row items-center justify-between">
-          <Text className="text-3xl font-bold text-gray-800">交換日記</Text>
+          <Text className="text-2xl font-bold text-gray-900">交換日記</Text>
           <TouchableOpacity
             onPress={handleCreateDiary}
-            className="bg-app-primary w-12 h-12 rounded-full items-center justify-center shadow-md"
+            className="bg-app-primary rounded-full p-2 active:opacity-70"
           >
-            <Text className="text-white text-2xl font-light">+</Text>
+            <Ionicons name="add" size={24} color="white" />
           </TouchableOpacity>
         </View>
       </View>
