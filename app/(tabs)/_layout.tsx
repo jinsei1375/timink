@@ -56,6 +56,12 @@ export default function TabLayout() {
           href: null, // タブバーに表示しない
         }}
       />
+      <Tabs.Screen
+        name="create-capsule"
+        options={{
+          href: null, // タブバーに表示しない
+        }}
+      />
     </Tabs>
   );
 }
