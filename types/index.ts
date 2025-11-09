@@ -78,6 +78,64 @@ export interface UserSearchResult {
   friendship_status?: 'pending' | 'accepted' | 'none';
 }
 
+// Capsule Types
+export type CapsuleType = 'personal' | 'one_to_one' | 'group';
+export type CapsuleStatus = 'locked' | 'unlocked' | 'deleted';
+export type MemberRole = 'owner' | 'member';
+export type MemberStatus = 'active' | 'left' | 'removed';
+export type ContentType = 'text' | 'image' | 'video' | 'audio';
+
+export interface Capsule {
+  id: string;
+  title: string;
+  description?: string;
+  created_by: string;
+  created_at: string;
+  unlock_at: string;
+  capsule_type: CapsuleType;
+  status: CapsuleStatus;
+  unlocked_at?: string;
+  updated_at: string;
+}
+
+export interface CapsuleMember {
+  id: string;
+  capsule_id: string;
+  user_id: string;
+  role: MemberRole;
+  status: MemberStatus;
+  joined_at: string;
+  last_viewed_at?: string;
+}
+
+export interface CapsuleContent {
+  id: string;
+  capsule_id: string;
+  created_by: string;
+  content_type: ContentType;
+  text_content?: string;
+  media_url?: string;
+  media_thumbnail_url?: string;
+  file_size?: number;
+  duration?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CapsuleWithMembers extends Capsule {
+  members: CapsuleMember[];
+  contents_count?: number;
+  creator?: Profile;
+}
+
+export interface CreateCapsuleData {
+  title: string;
+  description?: string;
+  unlock_at: string;
+  capsule_type: CapsuleType;
+  member_ids?: string[];
+}
+
 // Database Schema Types
 export interface Database {
   public: {
