@@ -1,5 +1,13 @@
-import { supabase } from '../lib/supabase';
-import { Capsule, CapsuleContent, CapsuleWithMembers, CreateCapsuleData } from '../types';
+import { supabase } from '@/lib/supabase';
+import {
+  Capsule,
+  CapsuleContent,
+  CapsuleContentWithAuthor,
+  CapsuleStatus,
+  CapsuleWithMembers,
+  CreateCapsuleData,
+  UpdateCapsuleContentData,
+} from '@/types';
 
 class CapsuleService {
   /**
@@ -22,6 +30,7 @@ class CapsuleService {
       )
       .eq('members.user_id', userId)
       .eq('members.status', 'active')
+      .neq('status', 'deleted')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -185,6 +194,31 @@ class CapsuleService {
   }
 
   /**
+   * タイムカプセルの全コンテンツを作成者情報付きで取得
+   */
+  async getCapsuleContentsWithAuthors(capsuleId: string): Promise<CapsuleContentWithAuthor[]> {
+    const contents = await this.getCapsuleContents(capsuleId);
+
+    // 各コンテンツの作成者情報を取得
+    const contentsWithAuthors = await Promise.all(
+      contents.map(async (content) => {
+        const { data: authorProfile } = await supabase
+          .from('profiles')
+          .select('id, user_id, display_name, avatar_url, bio, created_at, updated_at')
+          .eq('user_id', content.created_by)
+          .single();
+
+        return {
+          ...content,
+          author: authorProfile || undefined,
+        } as CapsuleContentWithAuthor;
+      })
+    );
+
+    return contentsWithAuthors;
+  }
+
+  /**
    * タイムカプセルにコンテンツを追加
    */
   async addContent(
@@ -265,15 +299,94 @@ class CapsuleService {
    * タイムカプセルを削除
    */
   async deleteCapsule(capsuleId: string): Promise<void> {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('capsules')
-      .update({ status: 'deleted' })
-      .eq('id', capsuleId);
+      .update({ status: 'deleted' as CapsuleStatus })
+      .eq('id', capsuleId)
+      .select();
 
     if (error) {
       console.error('Error deleting capsule:', error);
       throw error;
     }
+
+    if (!data || data.length === 0) {
+      console.error('No rows updated. Possible RLS policy issue or capsule not found.');
+      throw new Error('カプセルの削除に失敗しました（権限がないか、カプセルが見つかりません）');
+    }
+
+    console.log('Capsule deleted successfully:', data[0]);
+  }
+
+  /**
+   * ユーザーの投稿したコンテンツを取得（1人1つまで）
+   */
+  async getUserContent(
+    capsuleId: string,
+    userId: string
+  ): Promise<CapsuleContentWithAuthor | null> {
+    const { data, error } = await supabase
+      .from('capsule_contents')
+      .select('*')
+      .eq('capsule_id', capsuleId)
+      .eq('created_by', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching user content:', error);
+      throw error;
+    }
+
+    if (!data) return null;
+
+    // 作成者のプロフィールを別途取得
+    const { data: authorProfile } = await supabase
+      .from('profiles')
+      .select('id, user_id, display_name, avatar_url')
+      .eq('user_id', userId)
+      .single();
+
+    return {
+      ...data,
+      author: authorProfile || undefined,
+    };
+  }
+
+  /**
+   * コンテンツを作成または更新（1人1つ制約）
+   */
+  async createOrUpdateContent(
+    capsuleId: string,
+    userId: string,
+    data: UpdateCapsuleContentData
+  ): Promise<CapsuleContent> {
+    // 既存のコンテンツを確認
+    const existingContent = await this.getUserContent(capsuleId, userId);
+
+    if (existingContent) {
+      // 既に保存済みの場合は編集不可
+      throw new Error('EDIT_LIMIT_REACHED');
+    }
+
+    // 新規作成（1度のみ保存可能）
+    const { data: created, error } = await supabase
+      .from('capsule_contents')
+      .insert({
+        capsule_id: capsuleId,
+        created_by: userId,
+        content_type: data.media_url ? 'image' : 'text',
+        text_content: data.text_content,
+        media_url: data.media_url,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating content:', error);
+      throw error;
+    }
+
+    return created;
   }
 
   /**

@@ -106,6 +106,7 @@ export interface CapsuleMember {
   status: MemberStatus;
   joined_at: string;
   last_viewed_at?: string;
+  profile?: Profile;
 }
 
 export interface CapsuleContent {
@@ -134,6 +135,16 @@ export interface CreateCapsuleData {
   unlock_at: string;
   capsule_type: CapsuleType;
   member_ids?: string[];
+}
+
+export interface UpdateCapsuleContentData {
+  text_content?: string;
+  media_url?: string;
+  media_thumbnail_url?: string;
+}
+
+export interface CapsuleContentWithAuthor extends CapsuleContent {
+  author?: Profile;
 }
 
 // Database Schema Types
