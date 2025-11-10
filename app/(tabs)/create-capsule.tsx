@@ -1,3 +1,10 @@
+import { CalendarPickerModal } from '@/components/capsule/CalendarPickerModal';
+import { CapsuleTypeSelector } from '@/components/capsule/CapsuleTypeSelector';
+import { CreateConfirmModal } from '@/components/capsule/CreateConfirmModal';
+import { DatePickerModal } from '@/components/capsule/DatePickerModal';
+import { DateSelector } from '@/components/capsule/DateSelector';
+import { FormInput } from '@/components/capsule/FormInput';
+import { FriendSelector } from '@/components/capsule/FriendSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
 import { FriendService } from '@/services/friendService';
@@ -8,18 +15,12 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from 'react-native';
-
-type DatePreset = {
-  label: string;
-  months: number;
-};
 
 export default function CreateCapsuleScreen() {
   const { user } = useAuth();
@@ -32,6 +33,9 @@ export default function CreateCapsuleScreen() {
   const [capsuleType, setCapsuleType] = useState<CapsuleType>('personal');
   const [unlockDate, setUnlockDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCalendarPicker, setShowCalendarPicker] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [tempDate, setTempDate] = useState(new Date());
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
 
   useEffect(() => {
@@ -48,20 +52,26 @@ export default function CreateCapsuleScreen() {
     }
   };
 
-  const datePresets: DatePreset[] = [
-    { label: '1ヶ月後', months: 1 },
-    { label: '3ヶ月後', months: 3 },
-    { label: '6ヶ月後', months: 6 },
-    { label: '1年後', months: 12 },
-    { label: '2年後', months: 24 },
-    { label: '5年後', months: 60 },
-  ];
-
-  const selectDatePreset = (months: number) => {
+  const handleSelectDatePreset = (months: number) => {
     const date = new Date();
     date.setMonth(date.getMonth() + months);
     setUnlockDate(date);
     setShowDatePicker(false);
+  };
+
+  const handleOpenCalendar = () => {
+    setShowDatePicker(false);
+    setTempDate(unlockDate);
+    if (Platform.OS === 'ios') {
+      setTimeout(() => setShowCalendarPicker(true), 100);
+    } else {
+      setShowCalendarPicker(true);
+    }
+  };
+
+  const handleConfirmCalendar = () => {
+    setUnlockDate(tempDate);
+    setShowCalendarPicker(false);
   };
 
   const toggleFriendSelection = (friendId: string) => {
@@ -94,11 +104,17 @@ export default function CreateCapsuleScreen() {
     return true;
   };
 
+  const handleCreateClick = () => {
+    if (!validateForm()) return;
+    setShowConfirmModal(true);
+  };
+
   const handleCreate = async () => {
-    if (!user || !validateForm()) return;
+    if (!user) return;
 
     try {
       setLoading(true);
+      setShowConfirmModal(false);
 
       const capsuleData = {
         title: title.trim(),
@@ -108,14 +124,10 @@ export default function CreateCapsuleScreen() {
         member_ids: capsuleType !== 'personal' ? selectedFriends : undefined,
       };
 
-      await capsuleService.createCapsule(capsuleData, user.id);
+      const createdCapsule = await capsuleService.createCapsule(capsuleData, user.id);
 
-      Alert.alert('成功', 'タイムカプセルを作成しました', [
-        {
-          text: 'OK',
-          onPress: () => router.back(),
-        },
-      ]);
+      // 作成したカプセルの詳細画面に遷移
+      router.replace(`/capsule/${createdCapsule.id}` as any);
     } catch (error) {
       console.error('Error creating capsule:', error);
       Alert.alert('エラー', 'タイムカプセルの作成に失敗しました');
@@ -140,98 +152,28 @@ export default function CreateCapsuleScreen() {
       <ScrollView className="flex-1">
         <View className="p-4">
           {/* タイトル */}
-          <View className="mb-6">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              タイトル <Text className="text-red-500">*</Text>
-            </Text>
-            <TextInput
-              value={title}
-              onChangeText={setTitle}
-              placeholder="タイムカプセルのタイトル"
-              className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
-              maxLength={50}
-            />
-          </View>
+          <FormInput
+            value={title}
+            onChangeText={setTitle}
+            label="タイトル"
+            placeholder="タイムカプセルのタイトル"
+            required
+            maxLength={50}
+          />
 
           {/* 説明 */}
-          <View className="mb-6">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">説明（任意）</Text>
-            <TextInput
-              value={description}
-              onChangeText={setDescription}
-              placeholder="このカプセルについての説明"
-              multiline
-              numberOfLines={3}
-              className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
-              style={{ height: 80, textAlignVertical: 'top' }}
-              maxLength={200}
-            />
-          </View>
+          <FormInput
+            value={description}
+            onChangeText={setDescription}
+            label="説明（任意）"
+            placeholder="このカプセルについての説明"
+            multiline
+            numberOfLines={3}
+            maxLength={200}
+          />
 
           {/* カプセルタイプ */}
-          <View className="mb-6">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              カプセルタイプ <Text className="text-red-500">*</Text>
-            </Text>
-            <View className="gap-2">
-              <Pressable
-                onPress={() => setCapsuleType('personal')}
-                className={`flex-row items-center p-4 rounded-xl border ${
-                  capsuleType === 'personal'
-                    ? 'bg-app-primary-light border-app-primary'
-                    : 'bg-white border-gray-300'
-                }`}
-              >
-                <Ionicons
-                  name={capsuleType === 'personal' ? 'radio-button-on' : 'radio-button-off'}
-                  size={24}
-                  color={capsuleType === 'personal' ? '#6C6EE6' : '#9CA3AF'}
-                />
-                <View className="ml-3 flex-1">
-                  <Text className="text-base font-semibold text-gray-900">個人</Text>
-                  <Text className="text-sm text-gray-600">自分だけのカプセル</Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setCapsuleType('one_to_one')}
-                className={`flex-row items-center p-4 rounded-xl border ${
-                  capsuleType === 'one_to_one'
-                    ? 'bg-app-primary-light border-app-primary'
-                    : 'bg-white border-gray-300'
-                }`}
-              >
-                <Ionicons
-                  name={capsuleType === 'one_to_one' ? 'radio-button-on' : 'radio-button-off'}
-                  size={24}
-                  color={capsuleType === 'one_to_one' ? '#6C6EE6' : '#9CA3AF'}
-                />
-                <View className="ml-3 flex-1">
-                  <Text className="text-base font-semibold text-gray-900">1対1</Text>
-                  <Text className="text-sm text-gray-600">友達1人と共有</Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setCapsuleType('group')}
-                className={`flex-row items-center p-4 rounded-xl border ${
-                  capsuleType === 'group'
-                    ? 'bg-app-primary-light border-app-primary'
-                    : 'bg-white border-gray-300'
-                }`}
-              >
-                <Ionicons
-                  name={capsuleType === 'group' ? 'radio-button-on' : 'radio-button-off'}
-                  size={24}
-                  color={capsuleType === 'group' ? '#6C6EE6' : '#9CA3AF'}
-                />
-                <View className="ml-3 flex-1">
-                  <Text className="text-base font-semibold text-gray-900">グループ</Text>
-                  <Text className="text-sm text-gray-600">複数の友達と共有</Text>
-                </View>
-              </Pressable>
-            </View>
-          </View>
+          <CapsuleTypeSelector selectedType={capsuleType} onSelect={setCapsuleType} />
 
           {/* 友達選択 */}
           {capsuleType !== 'personal' && (
@@ -246,108 +188,53 @@ export default function CreateCapsuleScreen() {
                   </Text>
                 </View>
               ) : (
-                <View className="bg-white border border-gray-300 rounded-xl overflow-hidden">
-                  {friends.map((friend) => (
-                    <Pressable
-                      key={friend.id}
-                      onPress={() => toggleFriendSelection(friend.profile.id)}
-                      className="flex-row items-center p-4 border-b border-gray-100"
-                    >
-                      <View className="bg-app-primary-light w-10 h-10 rounded-full items-center justify-center mr-3">
-                        <Text className="text-app-primary font-semibold">
-                          {friend.profile.display_name?.[0]?.toUpperCase() || '?'}
-                        </Text>
-                      </View>
-                      <Text className="flex-1 text-base text-gray-900">
-                        {friend.profile.display_name || '名前なし'}
-                      </Text>
-                      <Ionicons
-                        name={
-                          selectedFriends.includes(friend.profile.id)
-                            ? 'checkbox'
-                            : 'square-outline'
-                        }
-                        size={24}
-                        color={selectedFriends.includes(friend.profile.id) ? '#6C6EE6' : '#9CA3AF'}
-                      />
-                    </Pressable>
-                  ))}
-                </View>
+                <FriendSelector
+                  friends={friends}
+                  selectedFriendIds={selectedFriends}
+                  onToggleFriend={toggleFriendSelection}
+                  maxSelection={capsuleType === 'one_to_one' ? 1 : undefined}
+                />
               )}
             </View>
           )}
 
           {/* 開封日 */}
-          <View className="mb-6">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              開封日 <Text className="text-red-500">*</Text>
-            </Text>
-            <Pressable
-              onPress={() => setShowDatePicker(true)}
-              className="bg-white border border-gray-300 rounded-xl px-4 py-3 flex-row items-center justify-between"
-            >
-              <Text className="text-base text-gray-900">
-                {unlockDate.toLocaleDateString('ja-JP', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </Text>
-              <Ionicons name="calendar-outline" size={20} color="#6B7280" />
-            </Pressable>
-          </View>
+          <DateSelector unlockDate={unlockDate} onPress={() => setShowDatePicker(true)} />
         </View>
       </ScrollView>
 
       {/* 日付選択モーダル */}
-      <Modal
+      <DatePickerModal
         visible={showDatePicker}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowDatePicker(false)}
-      >
-        <Pressable
-          className="flex-1 bg-black/50 justify-center items-center"
-          onPress={() => setShowDatePicker(false)}
-        >
-          <View className="bg-white rounded-2xl p-6 m-4 w-80">
-            <Text className="text-xl font-bold text-gray-900 mb-4">開封日を選択</Text>
-            <View className="gap-2">
-              {datePresets.map((preset) => (
-                <Pressable
-                  key={preset.label}
-                  onPress={() => selectDatePreset(preset.months)}
-                  className="bg-gray-50 p-4 rounded-xl active:bg-gray-100"
-                >
-                  <Text className="text-base font-medium text-gray-900">{preset.label}</Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    {(() => {
-                      const date = new Date();
-                      date.setMonth(date.getMonth() + preset.months);
-                      return date.toLocaleDateString('ja-JP', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      });
-                    })()}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-            <Pressable
-              onPress={() => setShowDatePicker(false)}
-              className="mt-4 p-3 rounded-xl bg-gray-100"
-            >
-              <Text className="text-center text-base font-medium text-gray-700">キャンセル</Text>
-            </Pressable>
-          </View>
-        </Pressable>
-      </Modal>
+        onClose={() => setShowDatePicker(false)}
+        onSelectPreset={handleSelectDatePreset}
+        onOpenCalendar={handleOpenCalendar}
+      />
+
+      {/* カレンダーピッカーモーダル */}
+      <CalendarPickerModal
+        visible={showCalendarPicker}
+        value={tempDate}
+        onChange={setTempDate}
+        onConfirm={handleConfirmCalendar}
+        onCancel={() => setShowCalendarPicker(false)}
+      />
+
+      {/* 作成確認モーダル */}
+      <CreateConfirmModal
+        visible={showConfirmModal}
+        title={title}
+        capsuleType={capsuleType}
+        unlockDate={unlockDate}
+        friendCount={selectedFriends.length}
+        onConfirm={handleCreate}
+        onCancel={() => setShowConfirmModal(false)}
+      />
 
       {/* 作成ボタン */}
       <View className="bg-white border-t border-gray-200 p-4">
         <Pressable
-          onPress={handleCreate}
+          onPress={handleCreateClick}
           disabled={loading}
           className={`rounded-xl py-4 items-center ${loading ? 'bg-gray-400' : 'bg-app-primary'}`}
         >

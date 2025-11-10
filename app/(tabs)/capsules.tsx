@@ -4,9 +4,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 
 export default function CapsulesScreen() {
   const { user } = useAuth();
@@ -33,14 +41,22 @@ export default function CapsulesScreen() {
     loadCapsules();
   }, [user]);
 
+  // 画面がフォーカスされた時にリロード（削除後などに対応）
+  useFocusEffect(
+    useCallback(() => {
+      if (user && !loading) {
+        loadCapsules();
+      }
+    }, [user])
+  );
+
   const handleRefresh = () => {
     setRefreshing(true);
     loadCapsules();
   };
 
   const handleCapsulePress = (capsuleId: string) => {
-    // TODO: カプセル詳細画面を実装後にルーティング追加
-    console.log('Capsule pressed:', capsuleId);
+    router.push(`/capsule/${capsuleId}` as any);
   };
 
   const handleCreatePress = () => {
@@ -123,11 +139,16 @@ export default function CapsulesScreen() {
 
       {/* カプセル一覧 */}
       {filteredCapsules.length === 0 ? (
-        <EmptyState
-          iconName="cube-outline"
-          title="カプセルがありません"
-          description="右上の + ボタンから新しいタイムカプセルを作成しましょう"
-        />
+        <ScrollView
+          contentContainerStyle={{ flex: 1 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        >
+          <EmptyState
+            iconName="cube-outline"
+            title="カプセルがありません"
+            description="右上の + ボタンから新しいタイムカプセルを作成しましょう"
+          />
+        </ScrollView>
       ) : (
         <FlatList
           data={filteredCapsules}
