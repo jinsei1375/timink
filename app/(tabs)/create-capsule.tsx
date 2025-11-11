@@ -30,7 +30,7 @@ export default function CreateCapsuleScreen() {
   // フォーム状態
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [capsuleType, setCapsuleType] = useState<CapsuleType>('personal');
+  const [capsuleType, setCapsuleType] = useState<CapsuleType>(CapsuleType.Personal);
   const [unlockDate, setUnlockDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCalendarPicker, setShowCalendarPicker] = useState(false);
@@ -91,12 +91,12 @@ export default function CreateCapsuleScreen() {
       return false;
     }
 
-    if (capsuleType === 'one_to_one' && selectedFriends.length !== 1) {
+    if (capsuleType === CapsuleType.OneToOne && selectedFriends.length !== 1) {
       Alert.alert('エラー', '1対1のカプセルには1人の友達を選択してください');
       return false;
     }
 
-    if (capsuleType === 'group' && selectedFriends.length === 0) {
+    if (capsuleType === CapsuleType.Group && selectedFriends.length === 0) {
       Alert.alert('エラー', 'グループカプセルには最低1人の友達を選択してください');
       return false;
     }
@@ -192,7 +192,7 @@ export default function CreateCapsuleScreen() {
                   friends={friends}
                   selectedFriendIds={selectedFriends}
                   onToggleFriend={toggleFriendSelection}
-                  maxSelection={capsuleType === 'one_to_one' ? 1 : undefined}
+                  maxSelection={capsuleType === CapsuleType.OneToOne ? 1 : undefined}
                 />
               )}
             </View>

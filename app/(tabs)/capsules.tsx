@@ -2,7 +2,7 @@ import { CapsuleCard } from '@/components/capsule/CapsuleCard';
 import { EmptyState } from '@/components/capsule/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
-import { CapsuleWithMembers } from '@/types';
+import { CapsuleStatus, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -21,7 +21,9 @@ export default function CapsulesScreen() {
   const [capsules, setCapsules] = useState<CapsuleWithMembers[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'locked' | 'unlocked'>('all');
+  const [filter, setFilter] = useState<'all' | CapsuleStatus.Locked | CapsuleStatus.Unlocked>(
+    'all'
+  );
 
   const loadCapsules = async () => {
     if (!user) return;
@@ -65,8 +67,8 @@ export default function CapsulesScreen() {
 
   const filteredCapsules = capsules.filter((capsule) => {
     if (filter === 'all') return true;
-    if (filter === 'locked') return capsule.status === 'locked';
-    if (filter === 'unlocked') return capsule.status === 'unlocked';
+    if (filter === CapsuleStatus.Locked) return capsule.status === CapsuleStatus.Locked;
+    if (filter === CapsuleStatus.Unlocked) return capsule.status === CapsuleStatus.Unlocked;
     return true;
   });
 
@@ -107,28 +109,28 @@ export default function CapsulesScreen() {
             </Text>
           </Pressable>
           <Pressable
-            onPress={() => setFilter('locked')}
+            onPress={() => setFilter(CapsuleStatus.Locked)}
             className={`px-4 py-2 rounded-full ${
-              filter === 'locked' ? 'bg-app-primary' : 'bg-gray-100'
+              filter === CapsuleStatus.Locked ? 'bg-app-primary' : 'bg-gray-100'
             }`}
           >
             <Text
               className={`text-sm font-medium ${
-                filter === 'locked' ? 'text-white' : 'text-gray-700'
+                filter === CapsuleStatus.Locked ? 'text-white' : 'text-gray-700'
               }`}
             >
               ロック中
             </Text>
           </Pressable>
           <Pressable
-            onPress={() => setFilter('unlocked')}
+            onPress={() => setFilter(CapsuleStatus.Unlocked)}
             className={`px-4 py-2 rounded-full ${
-              filter === 'unlocked' ? 'bg-app-primary' : 'bg-gray-100'
+              filter === CapsuleStatus.Unlocked ? 'bg-app-primary' : 'bg-gray-100'
             }`}
           >
             <Text
               className={`text-sm font-medium ${
-                filter === 'unlocked' ? 'text-white' : 'text-gray-700'
+                filter === CapsuleStatus.Unlocked ? 'text-white' : 'text-gray-700'
               }`}
             >
               開封済み

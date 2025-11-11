@@ -7,7 +7,7 @@ import { UploadingIndicator } from '@/components/capsule/UploadingIndicator';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
 import { StorageService } from '@/services/storageService';
-import { CapsuleContentWithAuthor, CapsuleWithMembers } from '@/types';
+import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -84,7 +84,7 @@ export default function EditCapsuleContentScreen() {
     if (!user || !capsule) return;
 
     // 開封済みの場合は編集不可
-    if (capsule.status === 'unlocked') {
+    if (capsule.status === CapsuleStatus.Unlocked) {
       Alert.alert('エラー', '開封済みのカプセルは編集できません');
       return;
     }

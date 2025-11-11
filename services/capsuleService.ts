@@ -1,13 +1,13 @@
 import { supabase } from '@/lib/supabase';
-import {
+import type {
   Capsule,
   CapsuleContent,
   CapsuleContentWithAuthor,
-  CapsuleStatus,
   CapsuleWithMembers,
   CreateCapsuleData,
   UpdateCapsuleContentData,
 } from '@/types';
+import { CapsuleStatus, ContentType, MemberRole, MemberStatus } from '@/types';
 
 class CapsuleService {
   /**
@@ -78,7 +78,7 @@ class CapsuleService {
         created_by: userId,
         unlock_at: data.unlock_at,
         capsule_type: data.capsule_type,
-        status: 'locked',
+        status: CapsuleStatus.Locked,
       })
       .select()
       .single();
@@ -92,8 +92,8 @@ class CapsuleService {
     const { error: ownerError } = await supabase.from('capsule_members').insert({
       capsule_id: capsule.id,
       user_id: userId,
-      role: 'owner',
-      status: 'active',
+      role: MemberRole.Owner,
+      status: MemberStatus.Active,
     });
 
     if (ownerError) {
@@ -108,8 +108,8 @@ class CapsuleService {
       const memberInserts = data.member_ids.map((memberId) => ({
         capsule_id: capsule.id,
         user_id: memberId,
-        role: 'member' as const,
-        status: 'active' as const,
+        role: MemberRole.Member,
+        status: MemberStatus.Active,
       }));
 
       const { error: membersError } = await supabase.from('capsule_members').insert(memberInserts);
@@ -284,7 +284,7 @@ class CapsuleService {
     const { error } = await supabase
       .from('capsules')
       .update({
-        status: 'unlocked',
+        status: CapsuleStatus.Unlocked,
         unlocked_at: new Date().toISOString(),
       })
       .eq('id', capsuleId);
@@ -374,7 +374,7 @@ class CapsuleService {
       .insert({
         capsule_id: capsuleId,
         created_by: userId,
-        content_type: data.media_url ? 'image' : 'text',
+        content_type: data.media_url ? ContentType.Image : ContentType.Text,
         text_content: data.text_content,
         media_url: data.media_url,
       })

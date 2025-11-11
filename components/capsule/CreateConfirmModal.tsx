@@ -23,11 +23,11 @@ export function CreateConfirmModal({
 }: Props) {
   const getCapsuleTypeLabel = () => {
     switch (capsuleType) {
-      case 'personal':
+      case CapsuleType.Personal:
         return '個人';
-      case 'one_to_one':
+      case CapsuleType.OneToOne:
         return '1対1';
-      case 'group':
+      case CapsuleType.Group:
         return 'グループ';
       default:
         return '';

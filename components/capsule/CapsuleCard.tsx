@@ -1,5 +1,5 @@
 import { capsuleService } from '@/services/capsuleService';
-import { CapsuleWithMembers } from '@/types';
+import { CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 
@@ -10,15 +10,15 @@ interface CapsuleCardProps {
 
 export function CapsuleCard({ capsule, onPress }: CapsuleCardProps) {
   const timeRemaining = capsuleService.getTimeUntilUnlock(capsule.unlock_at);
-  const isLocked = capsule.status === 'locked' && !timeRemaining.isUnlockable;
+  const isLocked = capsule.status === CapsuleStatus.Locked && !timeRemaining.isUnlockable;
 
   const getCapsuleTypeLabel = () => {
     switch (capsule.capsule_type) {
-      case 'personal':
+      case CapsuleType.Personal:
         return '個人';
-      case 'one_to_one':
+      case CapsuleType.OneToOne:
         return '1対1';
-      case 'group':
+      case CapsuleType.Group:
         return 'グループ';
       default:
         return '';

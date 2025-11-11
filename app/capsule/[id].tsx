@@ -1,7 +1,7 @@
 import { MemberAvatarGroup } from '@/components/diary/MemberAvatarGroup';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
-import { CapsuleContentWithAuthor, CapsuleWithMembers } from '@/types';
+import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -96,7 +96,7 @@ export default function CapsuleDetailScreen() {
 
   const timeUntilUnlock = capsuleService.getTimeUntilUnlock(capsule.unlock_at);
   const isOwner = capsule.created_by === user?.id;
-  const isUnlocked = capsule.status === 'unlocked';
+  const isUnlocked = capsule.status === CapsuleStatus.Unlocked;
 
   // ロックアイコンの色
   const lockColor = isUnlocked ? '#10B981' : '#6C6EE6';
@@ -130,9 +130,9 @@ export default function CapsuleDetailScreen() {
         <View className="flex-row items-center mt-4">
           <View className="bg-white/20 px-3 py-1 rounded-full">
             <Text className="text-white text-sm">
-              {capsule.capsule_type === 'personal'
+              {capsule.capsule_type === CapsuleType.Personal
                 ? '個人'
-                : capsule.capsule_type === 'one_to_one'
+                : capsule.capsule_type === CapsuleType.OneToOne
                   ? '1対1'
                   : 'グループ'}
             </Text>

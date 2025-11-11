@@ -10,19 +10,19 @@ type Props = {
 export function CapsuleTypeSelector({ selectedType, onSelect }: Props) {
   const types = [
     {
-      value: 'personal' as CapsuleType,
+      value: CapsuleType.Personal,
       icon: 'person-outline',
       title: '個人',
       description: '自分だけのカプセル',
     },
     {
-      value: 'one_to_one' as CapsuleType,
+      value: CapsuleType.OneToOne,
       icon: 'people-outline',
       title: '1対1',
       description: '友達1人と共有',
     },
     {
-      value: 'group' as CapsuleType,
+      value: CapsuleType.Group,
       icon: 'people',
       title: 'グループ',
       description: '複数の友達と共有',

@@ -78,12 +78,36 @@ export interface UserSearchResult {
   friendship_status?: 'pending' | 'accepted' | 'none';
 }
 
-// Capsule Types
-export type CapsuleType = 'personal' | 'one_to_one' | 'group';
-export type CapsuleStatus = 'locked' | 'unlocked' | 'deleted';
-export type MemberRole = 'owner' | 'member';
-export type MemberStatus = 'active' | 'left' | 'removed';
-export type ContentType = 'text' | 'image' | 'video' | 'audio';
+// Capsule Types - Enums for better type safety and readability
+export enum CapsuleType {
+  Personal = 'personal',
+  OneToOne = 'one_to_one',
+  Group = 'group',
+}
+
+export enum CapsuleStatus {
+  Locked = 'locked',
+  Unlocked = 'unlocked',
+  Deleted = 'deleted',
+}
+
+export enum MemberRole {
+  Owner = 'owner',
+  Member = 'member',
+}
+
+export enum MemberStatus {
+  Active = 'active',
+  Left = 'left',
+  Removed = 'removed',
+}
+
+export enum ContentType {
+  Text = 'text',
+  Image = 'image',
+  Video = 'video',
+  Audio = 'audio',
+}
 
 export interface Capsule {
   id: string;
