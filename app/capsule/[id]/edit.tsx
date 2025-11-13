@@ -132,7 +132,7 @@ export default function EditCapsuleContentScreen() {
       Alert.alert('保存完了', 'コンテンツを保存しました', [
         {
           text: 'OK',
-          onPress: () => router.back(),
+          onPress: () => router.replace(`/capsule/${id}` as any),
         },
       ]);
     } catch (error: any) {
