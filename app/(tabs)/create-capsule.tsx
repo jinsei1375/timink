@@ -5,6 +5,7 @@ import { DatePickerModal } from '@/components/capsule/DatePickerModal';
 import { DateSelector } from '@/components/capsule/DateSelector';
 import { FormInput } from '@/components/capsule/FormInput';
 import { FriendSelector } from '@/components/capsule/FriendSelector';
+import { InfoBox } from '@/components/ui/InfoBox';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
 import { FriendService } from '@/services/friendService';
@@ -182,11 +183,7 @@ export default function CreateCapsuleScreen() {
                 友達を選択 <Text className="text-red-500">*</Text>
               </Text>
               {friends.length === 0 ? (
-                <View className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                  <Text className="text-sm text-yellow-800">
-                    友達がいません。先に友達を追加してください。
-                  </Text>
-                </View>
+                <InfoBox type="warning" message="友達がいません。先に友達を追加してください。" />
               ) : (
                 <FriendSelector
                   friends={friends}

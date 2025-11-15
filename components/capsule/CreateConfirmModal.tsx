@@ -1,3 +1,4 @@
+import { InfoBox } from '@/components/ui/InfoBox';
 import { CapsuleType } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Modal, Pressable, Text, View } from 'react-native';
@@ -76,22 +77,13 @@ export function CreateConfirmModal({
           </View>
 
           {/* 注意事項 */}
-          <View className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
-            <View className="flex-row items-start mb-2">
-              <Ionicons name="warning-outline" size={20} color="#D97706" />
-              <Text className="text-sm font-semibold text-yellow-800 ml-2">注意事項</Text>
-            </View>
-            <View className="ml-7">
-              <Text className="text-sm text-yellow-800 mb-1">• 作成後、日付は変更できません</Text>
-              <Text className="text-sm text-yellow-800 mb-1">
-                • 開封日以前は他の人の内容は見れません
-              </Text>
-              <Text className="text-sm text-yellow-800">• 開封日になると自動的に開封されます</Text>
-            </View>
-          </View>
+          <InfoBox
+            type="warning"
+            title="注意事項"
+            message={`• 作成後、日付は変更できません\n• 開封日以前は他の人の内容は見れません\n• 開封日になると自動的に開封されます`}
+          />
 
-          {/* ボタン */}
-          <View className="gap-2">
+          <View className="gap-2 mt-6">
             <Pressable onPress={onConfirm} className="p-4 rounded-xl bg-app-primary">
               <Text className="text-center text-base font-semibold text-white">作成する</Text>
             </Pressable>

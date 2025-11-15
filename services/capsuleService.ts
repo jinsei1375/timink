@@ -296,6 +296,25 @@ class CapsuleService {
   }
 
   /**
+   * タイムカプセルのタイトルと説明を更新
+   */
+  async updateCapsuleInfo(
+    capsuleId: string,
+    data: { title?: string; description?: string }
+  ): Promise<void> {
+    const updateData: any = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+
+    const { error } = await supabase.from('capsules').update(updateData).eq('id', capsuleId);
+
+    if (error) {
+      console.error('Error updating capsule info:', error);
+      throw error;
+    }
+  }
+
+  /**
    * タイムカプセルを削除
    */
   async deleteCapsule(capsuleId: string): Promise<void> {

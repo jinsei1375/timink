@@ -1,4 +1,5 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { InfoBox } from '@/components/ui/InfoBox';
 import { useAuth } from '@/contexts/AuthContext';
 import { FriendService } from '@/services/friendService';
 import { UserSearchResult } from '@/types';
@@ -74,19 +75,11 @@ export default function AddFriendScreen() {
     if (!searchResult) return null;
 
     if (searchResult.is_friend) {
-      return (
-        <View className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
-          <Text className="text-green-700 text-center font-semibold">すでに友達です</Text>
-        </View>
-      );
+      return <InfoBox type="info" message="すでに友達です" icon="checkmark-circle" />;
     }
 
     if (searchResult.friendship_status === 'pending') {
-      return (
-        <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
-          <Text className="text-yellow-700 text-center font-semibold">リクエスト送信済み</Text>
-        </View>
-      );
+      return <InfoBox type="warning" message="リクエスト送信済み" icon="time-outline" />;
     }
 
     return null;

@@ -4,6 +4,7 @@ import { EditHeader } from '@/components/capsule/EditHeader';
 import { EditNotice } from '@/components/capsule/EditNotice';
 import { ImageUploader } from '@/components/capsule/ImageUploader';
 import { UploadingIndicator } from '@/components/capsule/UploadingIndicator';
+import { InfoBox } from '@/components/ui/InfoBox';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
 import { StorageService } from '@/services/storageService';
@@ -189,7 +190,16 @@ export default function EditCapsuleContentScreen() {
             このコンテンツは既に保存されているため、{'\n'}
             編集することができません。
           </Text>
-          <Pressable onPress={() => router.back()} className="bg-app-primary px-8 py-3 rounded-xl">
+          <InfoBox
+            type="danger"
+            title="保存済みコンテンツについて"
+            message="タイムカプセルのコンテンツは一度保存すると編集できません。タイトルや説明文は詳細画面から編集可能です。"
+            icon="lock-closed"
+          />
+          <Pressable
+            onPress={() => router.back()}
+            className="bg-app-primary px-8 py-3 rounded-xl mt-6"
+          >
             <Text className="text-white font-semibold">戻る</Text>
           </Pressable>
         </View>

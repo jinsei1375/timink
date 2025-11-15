@@ -1,4 +1,5 @@
 import { MemberAvatarGroup } from '@/components/diary/MemberAvatarGroup';
+import { InfoBox } from '@/components/ui/InfoBox';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
@@ -102,20 +103,25 @@ export default function CapsuleDetailScreen() {
   const lockColor = isUnlocked ? '#10B981' : '#6C6EE6';
 
   const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/(tabs)/capsules' as any);
-    }
+    router.replace('/(tabs)/capsules' as any);
   };
 
   return (
     <ScrollView className="flex-1 bg-white">
       {/* ヘッダー */}
       <View className="bg-app-primary p-6 pb-8">
-        <TouchableOpacity onPress={handleBack} className="mb-4">
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
+        <View className="flex-row items-center justify-between mb-4">
+          <TouchableOpacity onPress={handleBack}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+
+          {/* オーナーの場合は編集ボタンを表示 */}
+          {isOwner && (
+            <TouchableOpacity onPress={() => router.push(`/capsule/${id}/edit-info` as any)}>
+              <Ionicons name="create-outline" size={24} color="white" />
+            </TouchableOpacity>
+          )}
+        </View>
 
         <View className="flex-row items-center mb-2">
           <Ionicons name={isUnlocked ? 'lock-open' : 'lock-closed'} size={32} color="white" />
@@ -286,15 +292,11 @@ export default function CapsuleDetailScreen() {
 
         {/* コンテンツ保存済みメッセージ */}
         {!isUnlocked && userContent && (
-          <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-            <View className="flex-row items-center">
-              <Ionicons name="checkmark-circle" size={24} color="#10B981" />
-              <Text className="text-gray-700 font-medium ml-2">コンテンツを保存済みです</Text>
-            </View>
-            <Text className="text-gray-500 text-sm mt-2">
-              開封日時になると、あなたのコンテンツを含めすべてのコンテンツが閲覧できます
-            </Text>
-          </View>
+          <InfoBox
+            type="info"
+            title="コンテンツを保存済みです"
+            message="開封日時になると、あなたのコンテンツを含めすべてのコンテンツが閲覧できます"
+          />
         )}
 
         {/* 削除ボタン（オーナーのみ） */}

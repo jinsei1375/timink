@@ -1,3 +1,4 @@
+import { InfoBox } from '@/components/ui/InfoBox';
 import { Ionicons } from '@expo/vector-icons';
 import { Modal, Pressable, Text, View } from 'react-native';
 
@@ -28,18 +29,11 @@ export function EditConfirmModal({ visible, onConfirm, onCancel }: Props) {
             <Text className="text-base text-gray-700 text-center mb-4">
               保存すると、この内容で確定されます。
             </Text>
-            <View className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <View className="flex-row items-start">
-                <Ionicons name="alert-circle-outline" size={20} color="#DC2626" />
-                <View className="flex-1 ml-2">
-                  <Text className="text-sm font-semibold text-red-800 mb-1">重要</Text>
-                  <Text className="text-sm text-red-800">
-                    保存後は二度と編集できません。{'\n'}
-                    内容をよく確認してから保存してください。
-                  </Text>
-                </View>
-              </View>
-            </View>
+            <InfoBox
+              type="danger"
+              title="重要"
+              message={`保存後は二度と編集できません。\n内容をよく確認してから保存してください。`}
+            />
           </View>
 
           <View className="gap-2">
