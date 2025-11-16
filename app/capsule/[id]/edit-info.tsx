@@ -66,7 +66,7 @@ export default function EditCapsuleInfoScreen() {
       Alert.alert('保存完了', 'カプセル情報を更新しました', [
         {
           text: 'OK',
-          onPress: () => router.replace(`/capsule/${id}` as any),
+          onPress: () => router.back(),
         },
       ]);
     } catch (error) {

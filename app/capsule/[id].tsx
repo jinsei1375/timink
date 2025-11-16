@@ -103,7 +103,7 @@ export default function CapsuleDetailScreen() {
   const lockColor = isUnlocked ? '#10B981' : '#6C6EE6';
 
   const handleBack = () => {
-    router.replace('/(tabs)/capsules' as any);
+    router.back();
   };
 
   return (
