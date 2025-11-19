@@ -205,7 +205,7 @@ class CapsuleService {
         const { data: authorProfile } = await supabase
           .from('profiles')
           .select('id, user_id, display_name, avatar_url, bio, created_at, updated_at')
-          .eq('user_id', content.created_by)
+          .eq('id', content.created_by)
           .single();
 
         return {

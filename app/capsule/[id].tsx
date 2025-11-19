@@ -1,4 +1,5 @@
 import { MemberAvatarGroup } from '@/components/diary/MemberAvatarGroup';
+import { UserAvatar } from '@/components/diary/UserAvatar';
 import { InfoBox } from '@/components/ui/InfoBox';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
@@ -40,15 +41,16 @@ export default function CapsuleDetailScreen() {
 
     setLoading(true);
     try {
-      const [capsuleData, contentsData, userContentData] = await Promise.all([
+      const [capsuleData, contentsData] = await Promise.all([
         capsuleService.getCapsuleById(id as string),
-        capsuleService.getCapsuleContents(id as string),
-        capsuleService.getUserContent(id as string, user.id),
+        capsuleService.getCapsuleContentsWithAuthors(id as string),
       ]);
 
       setCapsule(capsuleData);
       setContents(contentsData);
-      setUserContent(userContentData);
+      // 自分のコンテンツを抽出
+      const myContent = contentsData.find((content) => content.created_by === user.id);
+      setUserContent(myContent || null);
     } catch (error) {
       console.error('Failed to load capsule data:', error);
       Alert.alert('エラー', 'カプセル情報の読み込みに失敗しました');
@@ -239,43 +241,41 @@ export default function CapsuleDetailScreen() {
         {isUnlocked && contents.length > 0 && (
           <View className="mb-6">
             <Text className="text-gray-700 font-semibold text-base mb-3">みんなの想い出</Text>
-            {contents.map((content) => (
-              <View
-                key={content.id}
-                className="bg-white rounded-xl p-4 mb-3 border border-gray-200"
-              >
-                {/* 投稿者情報 */}
-                <View className="flex-row items-center mb-3">
-                  <View className="w-10 h-10 rounded-full bg-app-primary items-center justify-center">
-                    <Text className="text-white font-semibold">
-                      {content.author?.display_name?.[0]?.toUpperCase() || '?'}
-                    </Text>
+            {contents.map((content) =>
+              content.author ? (
+                <View
+                  key={content.id}
+                  className="bg-white rounded-xl p-4 mb-3 border border-gray-200"
+                >
+                  {/* 投稿者情報 */}
+                  <View className="flex-row items-center mb-3">
+                    <UserAvatar user={content.author} size="medium" />
+                    <View className="ml-3 flex-1">
+                      <Text className="text-gray-900 font-semibold">
+                        {content.author.display_name || '名前なし'}
+                      </Text>
+                      <Text className="text-gray-500 text-xs">
+                        {new Date(content.created_at).toLocaleDateString('ja-JP')}
+                      </Text>
+                    </View>
                   </View>
-                  <View className="ml-3 flex-1">
-                    <Text className="text-gray-900 font-semibold">
-                      {content.author?.display_name || '名前なし'}
-                    </Text>
-                    <Text className="text-gray-500 text-xs">
-                      {new Date(content.created_at).toLocaleDateString('ja-JP')}
-                    </Text>
-                  </View>
+
+                  {/* テキストコンテンツ */}
+                  {content.text_content && (
+                    <Text className="text-gray-700 mb-3">{content.text_content}</Text>
+                  )}
+
+                  {/* 画像コンテンツ */}
+                  {content.media_url && (
+                    <Image
+                      source={{ uri: content.media_url }}
+                      className="w-full h-64 rounded-lg"
+                      resizeMode="cover"
+                    />
+                  )}
                 </View>
-
-                {/* テキストコンテンツ */}
-                {content.text_content && (
-                  <Text className="text-gray-700 mb-3">{content.text_content}</Text>
-                )}
-
-                {/* 画像コンテンツ */}
-                {content.media_url && (
-                  <Image
-                    source={{ uri: content.media_url }}
-                    className="w-full h-64 rounded-lg"
-                    resizeMode="cover"
-                  />
-                )}
-              </View>
-            ))}
+              ) : null
+            )}
           </View>
         )}
 
