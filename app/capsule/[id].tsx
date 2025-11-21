@@ -101,232 +101,244 @@ export default function CapsuleDetailScreen() {
   const timeUntilUnlock = capsuleService.getTimeUntilUnlock(capsule.unlock_at);
   const isOwner = capsule.created_by === user?.id;
   const isUnlocked = capsule.status === CapsuleStatus.Unlocked;
-
-  // ロックアイコンの色
-  const lockColor = isUnlocked ? '#10B981' : '#6C6EE6';
+  const lockColor = isUnlocked ? '#10B981' : '#EF4444';
 
   const handleBack = () => {
     router.back();
   };
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <View className="bg-app-primary p-6 pb-8">
-        <View className="flex-row items-center justify-between mb-4">
-          <BackButton onPress={handleBack} color="white" />
+      <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1 mr-2">
+            <BackButton onPress={handleBack} />
+            <Ionicons
+              name={isUnlocked ? 'lock-open' : 'lock-closed'}
+              size={24}
+              color={lockColor}
+              style={{ marginRight: 8 }}
+            />
+            <Text className="text-2xl font-bold text-gray-800 flex-1" numberOfLines={1}>
+              {capsule.title}
+            </Text>
+          </View>
 
           {/* オーナーの場合は編集ボタンを表示 */}
           {isOwner && (
             <TouchableOpacity onPress={() => router.push(`/capsule/${id}/edit-info` as any)}>
-              <Ionicons name="create-outline" size={24} color="white" />
+              <Ionicons name="create-outline" size={24} color="#4B5563" />
             </TouchableOpacity>
           )}
         </View>
-
-        <View className="flex-row items-center mb-2">
-          <Ionicons name={isUnlocked ? 'lock-open' : 'lock-closed'} size={32} color="white" />
-          <Text className="text-white text-2xl font-bold ml-3">{capsule.title}</Text>
-        </View>
-
-        {capsule.description && (
-          <Text className="text-white/80 text-base mt-2">{capsule.description}</Text>
-        )}
-
-        {/* タイムカプセルタイプ */}
-        <View className="flex-row items-center mt-4">
-          <View className="bg-white/20 px-3 py-1 rounded-full">
-            <Text className="text-white text-sm">
-              {capsule.capsule_type === CapsuleType.Personal
-                ? '個人'
-                : capsule.capsule_type === CapsuleType.OneToOne
-                  ? '1対1'
-                  : 'グループ'}
-            </Text>
-          </View>
-        </View>
       </View>
 
-      {/* コンテンツエリア */}
-      <View className="p-6">
-        {/* 開封状態 */}
-        <View className="bg-gray-50 rounded-xl p-4 mb-6">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-gray-700 font-semibold text-base">開封状態</Text>
-            <View
-              className={`px-3 py-1 rounded-full ${
-                isUnlocked ? 'bg-green-100' : 'bg-app-primary/10'
-              }`}
-            >
-              <Text
-                className={`text-sm font-medium ${
-                  isUnlocked ? 'text-green-700' : 'text-app-primary'
-                }`}
-              >
-                {isUnlocked ? '開封済み' : 'ロック中'}
+      <ScrollView className="flex-1">
+        <View className="p-6 pb-0">
+          {capsule.description && (
+            <Text className="text-gray-600 text-base mb-4">{capsule.description}</Text>
+          )}
+
+          {/* タイムカプセルタイプ */}
+          <View className="flex-row items-center">
+            <View className="bg-gray-100 px-3 py-1 rounded-full">
+              <Text className="text-gray-600 text-sm">
+                {capsule.capsule_type === CapsuleType.Personal
+                  ? '個人'
+                  : capsule.capsule_type === CapsuleType.OneToOne
+                    ? '1対1'
+                    : 'グループ'}
               </Text>
             </View>
           </View>
+        </View>
 
-          {!isUnlocked && (
-            <View>
-              <Text className="text-gray-600 text-sm mb-2">開封まで</Text>
-              <View className="flex-row items-center">
-                <View className="flex-row items-baseline">
-                  {timeUntilUnlock.days > 0 && (
-                    <>
-                      <Text className="text-3xl font-bold text-app-primary">
-                        {timeUntilUnlock.days}
-                      </Text>
-                      <Text className="text-gray-500 ml-1 mr-3">日</Text>
-                    </>
-                  )}
-                  <Text className="text-2xl font-bold text-app-primary">
-                    {timeUntilUnlock.hours}
-                  </Text>
-                  <Text className="text-gray-500 ml-1 mr-2">時間</Text>
-                  <Text className="text-2xl font-bold text-app-primary">
-                    {timeUntilUnlock.minutes}
-                  </Text>
-                  <Text className="text-gray-500 ml-1">分</Text>
-                </View>
-              </View>
-
-              {timeUntilUnlock.isUnlockable && (
-                <TouchableOpacity
-                  onPress={handleUnlock}
-                  disabled={unlocking}
-                  className="bg-app-primary rounded-lg py-3 mt-4"
+        {/* コンテンツエリア */}
+        <View className="p-6">
+          {/* 開封状態 */}
+          <View className="bg-gray-50 rounded-xl p-4 mb-6">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-gray-700 font-semibold text-base">開封状態</Text>
+              <View
+                className={`px-3 py-1 rounded-full ${
+                  isUnlocked ? 'bg-green-100' : 'bg-app-primary/10'
+                }`}
+              >
+                <Text
+                  className={`text-sm font-medium ${
+                    isUnlocked ? 'text-green-700' : 'text-app-primary'
+                  }`}
                 >
-                  {unlocking ? (
-                    <ActivityIndicator color="white" />
-                  ) : (
-                    <Text className="text-white text-center font-semibold">カプセルを開封する</Text>
-                  )}
-                </TouchableOpacity>
+                  {isUnlocked ? '開封済み' : 'ロック中'}
+                </Text>
+              </View>
+            </View>
+
+            {!isUnlocked && (
+              <View>
+                <Text className="text-gray-600 text-sm mb-2">開封まで</Text>
+                <View className="flex-row items-center">
+                  <View className="flex-row items-baseline">
+                    {timeUntilUnlock.days > 0 && (
+                      <>
+                        <Text className="text-3xl font-bold text-app-primary">
+                          {timeUntilUnlock.days}
+                        </Text>
+                        <Text className="text-gray-500 ml-1 mr-3">日</Text>
+                      </>
+                    )}
+                    <Text className="text-2xl font-bold text-app-primary">
+                      {timeUntilUnlock.hours}
+                    </Text>
+                    <Text className="text-gray-500 ml-1 mr-2">時間</Text>
+                    <Text className="text-2xl font-bold text-app-primary">
+                      {timeUntilUnlock.minutes}
+                    </Text>
+                    <Text className="text-gray-500 ml-1">分</Text>
+                  </View>
+                </View>
+
+                {timeUntilUnlock.isUnlockable && (
+                  <TouchableOpacity
+                    onPress={handleUnlock}
+                    disabled={unlocking}
+                    className="bg-app-primary rounded-lg py-3 mt-4"
+                  >
+                    {unlocking ? (
+                      <ActivityIndicator color="white" />
+                    ) : (
+                      <Text className="text-white text-center font-semibold">
+                        カプセルを開封する
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
+            {isUnlocked && capsule.unlocked_at && (
+              <Text className="text-gray-600 text-sm">
+                {new Date(capsule.unlocked_at).toLocaleDateString('ja-JP', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+                に開封されました
+              </Text>
+            )}
+          </View>
+
+          {/* メンバー */}
+          <View className="mb-6">
+            <Text className="text-gray-700 font-semibold text-base mb-3">メンバー</Text>
+            <MemberAvatarGroup
+              members={capsule.members?.filter((m) => m.profile).map((m) => m.profile!) || []}
+            />
+          </View>
+
+          {/* コンテンツ情報 */}
+          <View className="bg-gray-50 rounded-xl p-4 mb-6">
+            <Text className="text-gray-700 font-semibold text-base mb-2">投稿済みコンテンツ</Text>
+            <Text className="text-gray-600">
+              {capsule.contents_count || 0} / {capsule.members?.length || 1} 件
+            </Text>
+          </View>
+
+          {/* 開封後のコンテンツ一覧 */}
+          {isUnlocked && contents.length > 0 && (
+            <View className="mb-6">
+              <Text className="text-gray-700 font-semibold text-base mb-3">みんなの想い出</Text>
+              {contents.map((content) =>
+                content.author ? (
+                  <View
+                    key={content.id}
+                    className="bg-white rounded-xl p-4 mb-3 border border-gray-200"
+                  >
+                    {/* 投稿者情報 */}
+                    <View className="flex-row items-center mb-3">
+                      <UserAvatar user={content.author} size="medium" />
+                      <View className="ml-3 flex-1">
+                        <Text className="text-gray-900 font-semibold">
+                          {content.author.display_name || '名前なし'}
+                        </Text>
+                        <Text className="text-gray-500 text-xs">
+                          {new Date(content.created_at).toLocaleDateString('ja-JP')}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* テキストコンテンツ */}
+                    {content.text_content && (
+                      <Text className="text-gray-700 mb-3">{content.text_content}</Text>
+                    )}
+
+                    {/* 画像コンテンツ */}
+                    {content.media_url && (
+                      <Image
+                        source={{ uri: content.media_url }}
+                        className="w-full h-64 rounded-lg"
+                        resizeMode="cover"
+                      />
+                    )}
+                  </View>
+                ) : null
               )}
             </View>
           )}
 
-          {isUnlocked && capsule.unlocked_at && (
-            <Text className="text-gray-600 text-sm">
-              {new Date(capsule.unlocked_at).toLocaleDateString('ja-JP', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-              に開封されました
-            </Text>
+          {/* 編集ボタン（開封前のみ、かつコンテンツがまだない場合のみ表示） */}
+          {!isUnlocked && !userContent && (
+            <TouchableOpacity
+              onPress={handleEditContent}
+              className="bg-app-primary rounded-xl py-4 flex-row items-center justify-center"
+            >
+              <Ionicons name="create-outline" size={20} color="white" />
+              <Text className="text-white font-semibold text-base ml-2">
+                自分のコンテンツを作成
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* コンテンツ保存済みメッセージ */}
+          {!isUnlocked && userContent && (
+            <InfoBox
+              type="info"
+              title="コンテンツを保存済みです"
+              message="開封日時になると、あなたのコンテンツを含めすべてのコンテンツが閲覧できます"
+            />
+          )}
+
+          {/* 削除ボタン（オーナーのみ） */}
+          {isOwner && (
+            <TouchableOpacity
+              onPress={() => {
+                Alert.alert('カプセルを削除', 'このタイムカプセルを削除してもよろしいですか？', [
+                  { text: 'キャンセル', style: 'cancel' },
+                  {
+                    text: '削除',
+                    style: 'destructive',
+                    onPress: async () => {
+                      try {
+                        await capsuleService.deleteCapsule(capsule.id);
+                        router.replace('/(tabs)/capsules' as any);
+                        setTimeout(() => {
+                          Alert.alert('削除完了', 'カプセルを削除しました');
+                        }, 300);
+                      } catch (error) {
+                        Alert.alert('エラー', 'カプセルの削除に失敗しました');
+                      }
+                    },
+                  },
+                ]);
+              }}
+              className="border border-red-500 rounded-xl py-4 mt-3"
+            >
+              <Text className="text-red-500 text-center font-semibold">カプセルを削除</Text>
+            </TouchableOpacity>
           )}
         </View>
-
-        {/* メンバー */}
-        <View className="mb-6">
-          <Text className="text-gray-700 font-semibold text-base mb-3">メンバー</Text>
-          <MemberAvatarGroup
-            members={capsule.members?.filter((m) => m.profile).map((m) => m.profile!) || []}
-          />
-        </View>
-
-        {/* コンテンツ情報 */}
-        <View className="bg-gray-50 rounded-xl p-4 mb-6">
-          <Text className="text-gray-700 font-semibold text-base mb-2">投稿済みコンテンツ</Text>
-          <Text className="text-gray-600">
-            {capsule.contents_count || 0} / {capsule.members?.length || 1} 件
-          </Text>
-        </View>
-
-        {/* 開封後のコンテンツ一覧 */}
-        {isUnlocked && contents.length > 0 && (
-          <View className="mb-6">
-            <Text className="text-gray-700 font-semibold text-base mb-3">みんなの想い出</Text>
-            {contents.map((content) =>
-              content.author ? (
-                <View
-                  key={content.id}
-                  className="bg-white rounded-xl p-4 mb-3 border border-gray-200"
-                >
-                  {/* 投稿者情報 */}
-                  <View className="flex-row items-center mb-3">
-                    <UserAvatar user={content.author} size="medium" />
-                    <View className="ml-3 flex-1">
-                      <Text className="text-gray-900 font-semibold">
-                        {content.author.display_name || '名前なし'}
-                      </Text>
-                      <Text className="text-gray-500 text-xs">
-                        {new Date(content.created_at).toLocaleDateString('ja-JP')}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* テキストコンテンツ */}
-                  {content.text_content && (
-                    <Text className="text-gray-700 mb-3">{content.text_content}</Text>
-                  )}
-
-                  {/* 画像コンテンツ */}
-                  {content.media_url && (
-                    <Image
-                      source={{ uri: content.media_url }}
-                      className="w-full h-64 rounded-lg"
-                      resizeMode="cover"
-                    />
-                  )}
-                </View>
-              ) : null
-            )}
-          </View>
-        )}
-
-        {/* 編集ボタン（開封前のみ、かつコンテンツがまだない場合のみ表示） */}
-        {!isUnlocked && !userContent && (
-          <TouchableOpacity
-            onPress={handleEditContent}
-            className="bg-app-primary rounded-xl py-4 flex-row items-center justify-center"
-          >
-            <Ionicons name="create-outline" size={20} color="white" />
-            <Text className="text-white font-semibold text-base ml-2">自分のコンテンツを作成</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* コンテンツ保存済みメッセージ */}
-        {!isUnlocked && userContent && (
-          <InfoBox
-            type="info"
-            title="コンテンツを保存済みです"
-            message="開封日時になると、あなたのコンテンツを含めすべてのコンテンツが閲覧できます"
-          />
-        )}
-
-        {/* 削除ボタン（オーナーのみ） */}
-        {isOwner && (
-          <TouchableOpacity
-            onPress={() => {
-              Alert.alert('カプセルを削除', 'このタイムカプセルを削除してもよろしいですか？', [
-                { text: 'キャンセル', style: 'cancel' },
-                {
-                  text: '削除',
-                  style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      await capsuleService.deleteCapsule(capsule.id);
-                      router.replace('/(tabs)/capsules' as any);
-                      setTimeout(() => {
-                        Alert.alert('削除完了', 'カプセルを削除しました');
-                      }, 300);
-                    } catch (error) {
-                      Alert.alert('エラー', 'カプセルの削除に失敗しました');
-                    }
-                  },
-                },
-              ]);
-            }}
-            className="border border-red-500 rounded-xl py-4 mt-3"
-          >
-            <Text className="text-red-500 text-center font-semibold">カプセルを削除</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
