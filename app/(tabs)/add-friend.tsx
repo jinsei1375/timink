@@ -1,4 +1,4 @@
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { BackButton } from '@/components/ui/BackButton';
 import { InfoBox } from '@/components/ui/InfoBox';
 import { useAuth } from '@/contexts/AuthContext';
 import { FriendService } from '@/services/friendService';
@@ -93,14 +93,7 @@ export default function AddFriendScreen() {
       {/* ヘッダー */}
       <View className="px-6 pt-12 pb-4 border-b border-gray-200">
         <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
-            <IconSymbol
-              name="chevron.right"
-              size={24}
-              color="#6C6EE6"
-              style={{ transform: [{ rotate: '180deg' }] }}
-            />
-          </TouchableOpacity>
+          <BackButton onPress={() => router.back()} />
           <Text className="text-2xl font-bold text-gray-800">友達を追加</Text>
         </View>
       </View>

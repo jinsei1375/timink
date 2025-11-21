@@ -1,6 +1,6 @@
 import { EmptyState } from '@/components/diary/EmptyState';
 import { FriendSelectItem } from '@/components/diary/FriendSelectItem';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { BackButton } from '@/components/ui/BackButton';
 import { DiaryService } from '@/services/diaryService';
 import { FriendService } from '@/services/friendService';
 import { Friend } from '@/types';
@@ -117,14 +117,7 @@ export default function CreateDiaryScreen() {
       {/* ヘッダー */}
       <View className="px-6 pt-12 pb-4 border-b border-gray-200">
         <View className="flex-row items-center justify-between">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
-            <IconSymbol
-              name="chevron.right"
-              size={24}
-              color="#6C6EE6"
-              style={{ transform: [{ rotate: '180deg' }] }}
-            />
-          </TouchableOpacity>
+          <BackButton onPress={() => router.back()} />
           <Text className="text-2xl font-bold text-gray-800 flex-1">交換日記を作成</Text>
           <TouchableOpacity
             onPress={handleCreate}

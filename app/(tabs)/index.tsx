@@ -153,7 +153,7 @@ export default function HomeScreen() {
                 </View>
               ) : (
                 friends.map((friend) => (
-                  <TouchableOpacity
+                  <View
                     key={friend.id}
                     className="bg-gray-50 rounded-lg p-4 mb-2 flex-row items-center"
                   >
@@ -164,8 +164,7 @@ export default function HomeScreen() {
                       </Text>
                       <Text className="text-sm text-gray-500">@{friend.profile.user_id}</Text>
                     </View>
-                    <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
-                  </TouchableOpacity>
+                  </View>
                 ))
               )}
             </View>

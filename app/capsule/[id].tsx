@@ -1,5 +1,6 @@
 import { MemberAvatarGroup } from '@/components/diary/MemberAvatarGroup';
 import { UserAvatar } from '@/components/diary/UserAvatar';
+import { BackButton } from '@/components/ui/BackButton';
 import { InfoBox } from '@/components/ui/InfoBox';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
@@ -113,9 +114,7 @@ export default function CapsuleDetailScreen() {
       {/* ヘッダー */}
       <View className="bg-app-primary p-6 pb-8">
         <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={handleBack}>
-            <Ionicons name="arrow-back" size={24} color="white" />
-          </TouchableOpacity>
+          <BackButton onPress={handleBack} color="white" />
 
           {/* オーナーの場合は編集ボタンを表示 */}
           {isOwner && (
