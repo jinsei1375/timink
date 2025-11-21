@@ -1,5 +1,6 @@
 import { DiaryPageView } from '@/components/diary/DiaryPageView';
 import { DiaryPostForm } from '@/components/diary/DiaryPostForm';
+import { BackButton } from '@/components/ui/BackButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/contexts/AuthContext';
 import { DiaryService } from '@/services/diaryService';
@@ -17,7 +18,6 @@ import {
   Platform,
   RefreshControl,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -284,14 +284,7 @@ export default function DiaryDetailScreen() {
         {/* ヘッダー */}
         <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
           <View className="flex-row items-center">
-            <TouchableOpacity onPress={() => router.back()} className="mr-3">
-              <IconSymbol
-                name="chevron.right"
-                size={24}
-                color="#6C6EE6"
-                style={{ transform: [{ rotate: '180deg' }] }}
-              />
-            </TouchableOpacity>
+            <BackButton onPress={() => router.back()} />
             <View className="flex-1">
               <Text className="text-2xl font-bold text-gray-800">{diary.title}</Text>
               {entries.length > 0 && (
