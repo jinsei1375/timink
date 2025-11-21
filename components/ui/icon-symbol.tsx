@@ -14,6 +14,7 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'chevron.left': 'chevron-left',
   'book.fill': 'book',
   'hourglass.fill': 'hourglass-full',
   'person.fill': 'person',

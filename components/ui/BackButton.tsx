@@ -11,12 +11,7 @@ interface BackButtonProps {
 export function BackButton({ onPress, color = '#6C6EE6', size = 24 }: BackButtonProps) {
   return (
     <TouchableOpacity onPress={onPress} className="mr-3">
-      <IconSymbol
-        name="chevron.right"
-        size={size}
-        color={color}
-        style={{ transform: [{ rotate: '180deg' }] }}
-      />
+      <IconSymbol name="chevron.left" size={size} color={color} />
     </TouchableOpacity>
   );
 }
