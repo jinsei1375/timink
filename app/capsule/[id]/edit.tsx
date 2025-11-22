@@ -1,11 +1,13 @@
 import { ContentTextArea } from '@/components/capsule/ContentTextArea';
 import { EditConfirmModal } from '@/components/capsule/EditConfirmModal';
-import { EditHeader } from '@/components/capsule/EditHeader';
 import { EditNotice } from '@/components/capsule/EditNotice';
 import { ImageUploader } from '@/components/capsule/ImageUploader';
 import { UploadingIndicator } from '@/components/capsule/UploadingIndicator';
+import { BackButton } from '@/components/ui/BackButton';
 import { InfoBox } from '@/components/ui/InfoBox';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { StorageService } from '@/services/storageService';
 import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleWithMembers } from '@/types';
@@ -27,6 +29,11 @@ export default function EditCapsuleContentScreen() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const handleBack = useHandleBack({
+    name: 'capsule/[id]',
+    params: { id },
+  });
 
   useEffect(() => {
     if (id && user) {
@@ -133,7 +140,7 @@ export default function EditCapsuleContentScreen() {
       Alert.alert('保存完了', 'コンテンツを保存しました', [
         {
           text: 'OK',
-          onPress: () => router.back(),
+          onPress: handleBack,
         },
       ]);
     } catch (error: any) {
@@ -171,13 +178,13 @@ export default function EditCapsuleContentScreen() {
   if (content) {
     return (
       <View className="flex-1 bg-white">
-        <View className="bg-app-primary p-6 pb-4">
+        <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
           <View className="flex-row items-center justify-between">
-            <Pressable onPress={() => router.back()}>
-              <Ionicons name="close" size={28} color="white" />
-            </Pressable>
-            <Text className="text-white text-lg font-bold">コンテンツ編集</Text>
-            <View style={{ width: 28 }} />
+            <View style={{ width: 40 }}>
+              <BackButton onPress={handleBack} />
+            </View>
+            <Text className="text-xl font-bold text-gray-800">コンテンツ編集</Text>
+            <View style={{ width: 40 }} />
           </View>
         </View>
 
@@ -196,10 +203,7 @@ export default function EditCapsuleContentScreen() {
             message="タイムカプセルのコンテンツは一度保存すると編集できません。タイトルや説明文は詳細画面から編集可能です。"
             icon="lock-closed"
           />
-          <Pressable
-            onPress={() => router.back()}
-            className="bg-app-primary px-8 py-3 rounded-xl mt-6"
-          >
+          <Pressable onPress={handleBack} className="bg-app-primary px-8 py-3 rounded-xl mt-6">
             <Text className="text-white font-semibold">戻る</Text>
           </Pressable>
         </View>
@@ -210,16 +214,17 @@ export default function EditCapsuleContentScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <EditHeader
-        title={capsule.title}
-        subtitle="開封日時まで自分の投稿のみ閲覧できます"
-        onBack={() => router.back()}
-        onSave={handleSaveClick}
-        saving={saving || uploading}
-      />
+      <ScreenHeader title="コンテンツ編集" onBack={handleBack} />
 
       {/* コンテンツ入力エリア */}
       <ScrollView className="flex-1 p-6">
+        <View className="mb-6">
+          <Text className="text-gray-500 text-sm text-center">
+            {capsule.title}
+            {'\n'}
+            開封日時まで自分の投稿のみ閲覧できます
+          </Text>
+        </View>
         {/* テキスト入力 */}
         <ContentTextArea value={textContent} onChangeText={setTextContent} maxLength={1000} />
 
@@ -235,6 +240,23 @@ export default function EditCapsuleContentScreen() {
         {/* 注意事項 */}
         <EditNotice />
       </ScrollView>
+
+      {/* 保存ボタン */}
+      <View className="bg-white border-t border-gray-200 p-4">
+        <Pressable
+          onPress={handleSaveClick}
+          disabled={saving || uploading}
+          className={`rounded-xl py-4 items-center ${
+            saving || uploading ? 'bg-gray-400' : 'bg-app-primary'
+          }`}
+        >
+          {saving || uploading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text className="text-white text-base font-semibold">コンテンツを保存</Text>
+          )}
+        </Pressable>
+      </View>
 
       {/* 保存確認モーダル */}
       <EditConfirmModal

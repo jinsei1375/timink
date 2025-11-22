@@ -1,8 +1,9 @@
 import { MemberAvatarGroup } from '@/components/diary/MemberAvatarGroup';
 import { UserAvatar } from '@/components/diary/UserAvatar';
-import { BackButton } from '@/components/ui/BackButton';
 import { InfoBox } from '@/components/ui/InfoBox';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +28,11 @@ export default function CapsuleDetailScreen() {
   const [userContent, setUserContent] = useState<CapsuleContentWithAuthor | null>(null);
   const [loading, setLoading] = useState(true);
   const [unlocking, setUnlocking] = useState(false);
+
+  const handleBack = useHandleBack({
+    name: '(tabs)',
+    params: { screen: 'capsules' },
+  });
 
   useEffect(() => {
     if (id) {
@@ -103,36 +109,22 @@ export default function CapsuleDetailScreen() {
   const isUnlocked = capsule.status === CapsuleStatus.Unlocked;
   const lockColor = isUnlocked ? '#10B981' : '#EF4444';
 
-  const handleBack = () => {
-    router.back();
-  };
-
   return (
     <View className="flex-1 bg-white">
-      {/* ヘッダー */}
-      <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center flex-1 mr-2">
-            <BackButton onPress={handleBack} />
-            <Ionicons
-              name={isUnlocked ? 'lock-open' : 'lock-closed'}
-              size={24}
-              color={lockColor}
-              style={{ marginRight: 8 }}
-            />
-            <Text className="text-2xl font-bold text-gray-800 flex-1" numberOfLines={1}>
-              {capsule.title}
-            </Text>
-          </View>
-
-          {/* オーナーの場合は編集ボタンを表示 */}
-          {isOwner && (
+      <ScreenHeader
+        title={capsule.title}
+        onBack={handleBack}
+        titleIcon={
+          <Ionicons name={isUnlocked ? 'lock-open' : 'lock-closed'} size={24} color={lockColor} />
+        }
+        rightElement={
+          isOwner ? (
             <TouchableOpacity onPress={() => router.push(`/capsule/${id}/edit-info` as any)}>
               <Ionicons name="create-outline" size={24} color="#4B5563" />
             </TouchableOpacity>
-          )}
-        </View>
-      </View>
+          ) : undefined
+        }
+      />
 
       <ScrollView className="flex-1">
         <View className="p-6 pb-0">

@@ -1,8 +1,9 @@
 import { DiaryPageView } from '@/components/diary/DiaryPageView';
 import { DiaryPostForm } from '@/components/diary/DiaryPostForm';
-import { BackButton } from '@/components/ui/BackButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
 import { DiaryEntry, Profile } from '@/types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -47,6 +48,11 @@ export default function DiaryDetailScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [canPost, setCanPost] = useState(false);
   const [nextPostTime, setNextPostTime] = useState<Date | null>(null);
+
+  const handleBack = useHandleBack({
+    name: '(tabs)',
+    params: { screen: 'diaries' },
+  });
 
   const loadDiaryData = async () => {
     if (!id) return;
@@ -144,101 +150,37 @@ export default function DiaryDetailScreen() {
     loadDiaryData();
   };
 
-  const handlePost = useCallback(
-    async (content: string) => {
-      if (!id) return;
+  const handlePost = async (content: string) => {
+    if (!id || !profile) return;
 
+    try {
       const result = await DiaryService.createEntry(id, content);
 
       if (result.success) {
-        // Realtimeが有効な場合は自動的に追加されるので手動リロードは不要
-        // ただし、念のため重複チェック付きで再取得
-        // （Realtimeが遅延する場合のフォールバック）
-        setTimeout(async () => {
-          const entriesResult = await DiaryService.getDiaryEntries(id);
-          if (entriesResult.success) {
-            // 重複を排除して設定
-            setEntries((prevEntries) => {
-              const existingIds = new Set(prevEntries.map((e) => e.id));
-              const newEntries = entriesResult.data.filter((e) => !existingIds.has(e.id));
-              return newEntries.length > 0 ? [...prevEntries, ...newEntries] : prevEntries;
-            });
-          }
-        }, 1000); // Realtimeイベントを待つ
-
-        // 投稿可能状態を更新
-        const canPostToday = await DiaryService.canPostToday(id);
-        setCanPost(canPostToday);
-        if (!canPostToday) {
-          const nextTime = await DiaryService.getNextPostTime(id);
-          setNextPostTime(nextTime);
-        }
-
-        // 最新ページにスクロール
-        setTimeout(() => {
-          flatListRef.current?.scrollToEnd({ animated: true });
-        }, 200);
+        // 投稿成功時の処理はリアルタイム更新に任せるが、
+        // フォームのリセットなどのために成功を返す必要がある場合はここで処理
+        Alert.alert('投稿完了', '日記を投稿しました！');
       } else {
         Alert.alert('エラー', '投稿に失敗しました');
       }
-    },
-    [id]
-  );
+    } catch (error) {
+      console.error('投稿エラー:', error);
+      Alert.alert('エラー', '投稿中にエラーが発生しました');
+    }
+  };
 
   const renderPage = useCallback(
-    ({ item, index }: { item: DiaryEntry & { author: Profile }; index: number }) => {
-      if (!profile) return null;
-
-      // スクロール位置に基づいてアニメーション値を計算
-      const inputRange = [
-        (index - 1) * SCREEN_WIDTH,
-        index * SCREEN_WIDTH,
-        (index + 1) * SCREEN_WIDTH,
-      ];
-
-      // ページめくりアニメーション
-      const translateX = scrollX.interpolate({
-        inputRange,
-        outputRange: [SCREEN_WIDTH * 0.5, 0, -SCREEN_WIDTH * 0.3],
-        extrapolate: 'clamp',
-      });
-
-      const scale = scrollX.interpolate({
-        inputRange,
-        outputRange: [0.85, 1, 0.85],
-        extrapolate: 'clamp',
-      });
-
-      const opacity = scrollX.interpolate({
-        inputRange,
-        outputRange: [0.5, 1, 0.5],
-        extrapolate: 'clamp',
-      });
-
-      const rotateY = scrollX.interpolate({
-        inputRange,
-        outputRange: ['45deg', '0deg', '-45deg'],
-        extrapolate: 'clamp',
-      });
-
-      return (
-        <Animated.View
-          style={{
-            width: SCREEN_WIDTH,
-            transform: [{ translateX }, { scale }, { perspective: 1000 }, { rotateY }],
-            opacity,
-          }}
-        >
-          <DiaryPageView
-            entry={item}
-            currentUserId={profile.id}
-            currentPage={index}
-            totalPages={entries.length}
-          />
-        </Animated.View>
-      );
-    },
-    [profile, scrollX, entries.length]
+    ({ item, index }: { item: DiaryEntry & { author: Profile }; index: number }) => (
+      <View style={{ width: SCREEN_WIDTH }}>
+        <DiaryPageView
+          entry={item}
+          currentPage={index + 1}
+          totalPages={entries.length}
+          currentUserId={profile?.id}
+        />
+      </View>
+    ),
+    [entries.length, profile]
   );
 
   const keyExtractor = useCallback((item: DiaryEntry) => item.id, []);
@@ -281,20 +223,11 @@ export default function DiaryDetailScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <View className="flex-1 bg-gradient-to-b from-gray-100 to-gray-50">
-        {/* ヘッダー */}
-        <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
-          <View className="flex-row items-center">
-            <BackButton onPress={() => router.back()} />
-            <View className="flex-1">
-              <Text className="text-2xl font-bold text-gray-800">{diary.title}</Text>
-              {entries.length > 0 && (
-                <Text className="text-sm text-gray-500 mt-1">
-                  📖 {entries.length}ページの思い出
-                </Text>
-              )}
-            </View>
-          </View>
-        </View>
+        <ScreenHeader
+          title={diary.title}
+          subtitle={entries.length > 0 ? `📖 ${entries.length}ページの思い出` : undefined}
+          onBack={handleBack}
+        />
 
         {/* ページビュー（横スクロール） */}
         {entries.length === 0 ? (

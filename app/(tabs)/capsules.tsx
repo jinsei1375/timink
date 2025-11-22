@@ -1,5 +1,6 @@
 import { CapsuleCard } from '@/components/capsule/CapsuleCard';
 import { EmptyState } from '@/components/capsule/EmptyState';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleStatus, CapsuleWithMembers } from '@/types';
@@ -11,8 +12,8 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -82,86 +83,80 @@ export default function CapsulesScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* ヘッダー */}
-      <View className="bg-white border-b border-gray-200 px-6 pt-12 pb-4">
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-2xl font-bold text-gray-900">タイムカプセル</Text>
-          <Pressable
-            onPress={handleCreatePress}
-            className="bg-app-primary rounded-full p-2 active:opacity-70"
-          >
-            <Ionicons name="add" size={24} color="white" />
-          </Pressable>
-        </View>
+      <ScreenHeader
+        title="タイムカプセル"
+        rightElement={
+          <TouchableOpacity onPress={handleCreatePress}>
+            <Ionicons name="add-circle-outline" size={28} color="#6C6EE6" />
+          </TouchableOpacity>
+        }
+      />
 
-        {/* フィルター */}
-        <View className="flex-row gap-2">
-          <Pressable
-            onPress={() => setFilter('all')}
-            className={`px-4 py-2 rounded-full ${
-              filter === 'all' ? 'bg-app-primary' : 'bg-gray-100'
-            }`}
-          >
-            <Text
-              className={`text-sm font-medium ${filter === 'all' ? 'text-white' : 'text-gray-700'}`}
-            >
-              すべて
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setFilter(CapsuleStatus.Locked)}
-            className={`px-4 py-2 rounded-full ${
-              filter === CapsuleStatus.Locked ? 'bg-app-primary' : 'bg-gray-100'
-            }`}
-          >
-            <Text
-              className={`text-sm font-medium ${
-                filter === CapsuleStatus.Locked ? 'text-white' : 'text-gray-700'
+      <FlatList
+        data={filteredCapsules}
+        renderItem={({ item }) => (
+          <CapsuleCard capsule={item} onPress={() => handleCapsulePress(item.id)} />
+        )}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        ListHeaderComponent={
+          <View className="flex-row gap-2 mb-4">
+            <Pressable
+              onPress={() => setFilter('all')}
+              className={`px-4 py-2 rounded-full border ${
+                filter === 'all' ? 'bg-app-primary border-app-primary' : 'bg-white border-gray-200'
               }`}
             >
-              ロック中
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setFilter(CapsuleStatus.Unlocked)}
-            className={`px-4 py-2 rounded-full ${
-              filter === CapsuleStatus.Unlocked ? 'bg-app-primary' : 'bg-gray-100'
-            }`}
-          >
-            <Text
-              className={`text-sm font-medium ${
-                filter === CapsuleStatus.Unlocked ? 'text-white' : 'text-gray-700'
+              <Text
+                className={`text-sm font-medium ${
+                  filter === 'all' ? 'text-white' : 'text-gray-600'
+                }`}
+              >
+                すべて
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setFilter(CapsuleStatus.Locked)}
+              className={`px-4 py-2 rounded-full border ${
+                filter === CapsuleStatus.Locked
+                  ? 'bg-app-primary border-app-primary'
+                  : 'bg-white border-gray-200'
               }`}
             >
-              開封済み
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* カプセル一覧 */}
-      {filteredCapsules.length === 0 ? (
-        <ScrollView
-          contentContainerStyle={{ flex: 1 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-        >
+              <Text
+                className={`text-sm font-medium ${
+                  filter === CapsuleStatus.Locked ? 'text-white' : 'text-gray-600'
+                }`}
+              >
+                ロック中
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setFilter(CapsuleStatus.Unlocked)}
+              className={`px-4 py-2 rounded-full border ${
+                filter === CapsuleStatus.Unlocked
+                  ? 'bg-app-primary border-app-primary'
+                  : 'bg-white border-gray-200'
+              }`}
+            >
+              <Text
+                className={`text-sm font-medium ${
+                  filter === CapsuleStatus.Unlocked ? 'text-white' : 'text-gray-600'
+                }`}
+              >
+                開封済み
+              </Text>
+            </Pressable>
+          </View>
+        }
+        ListEmptyComponent={
           <EmptyState
-            iconName="cube-outline"
-            title="カプセルがありません"
-            description="右上の + ボタンから新しいタイムカプセルを作成しましょう"
+            title="タイムカプセルがありません"
+            description="新しいタイムカプセルを作成して、未来の自分や友達にメッセージを送りましょう"
           />
-        </ScrollView>
-      ) : (
-        <FlatList
-          data={filteredCapsules}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <CapsuleCard capsule={item} onPress={() => handleCapsulePress(item.id)} />
-          )}
-          contentContainerStyle={{ padding: 16 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-        />
-      )}
+        }
+      />
     </View>
   );
 }

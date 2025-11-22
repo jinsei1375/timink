@@ -1,6 +1,7 @@
 import { EmptyState } from '@/components/diary/EmptyState';
 import { FriendSelectItem } from '@/components/diary/FriendSelectItem';
-import { BackButton } from '@/components/ui/BackButton';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
 import { FriendService } from '@/services/friendService';
 import { Friend } from '@/types';
@@ -23,6 +24,11 @@ export default function CreateDiaryScreen() {
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+
+  const handleBack = useHandleBack({
+    name: '(tabs)',
+    params: { screen: 'diaries' },
+  });
 
   useEffect(() => {
     loadFriends();
@@ -65,7 +71,7 @@ export default function CreateDiaryScreen() {
         Alert.alert('作成完了', '交換日記を作成しました', [
           {
             text: 'OK',
-            onPress: () => router.back(),
+            onPress: handleBack,
           },
         ]);
       } else {
@@ -115,10 +121,10 @@ export default function CreateDiaryScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <View className="px-6 pt-12 pb-4 border-b border-gray-200">
-        <View className="flex-row items-center justify-between">
-          <BackButton onPress={() => router.back()} />
-          <Text className="text-2xl font-bold text-gray-800 flex-1">交換日記を作成</Text>
+      <ScreenHeader
+        title="交換日記を作成"
+        onBack={handleBack}
+        rightElement={
           <TouchableOpacity
             onPress={handleCreate}
             disabled={isCreating || !title.trim() || selectedFriends.length === 0}
@@ -134,8 +140,8 @@ export default function CreateDiaryScreen() {
               <Text className="text-white font-semibold">作成</Text>
             )}
           </TouchableOpacity>
-        </View>
-      </View>
+        }
+      />
 
       <View className="flex-1 px-6">
         {/* タイトル入力 */}

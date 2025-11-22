@@ -1,6 +1,7 @@
-import { BackButton } from '@/components/ui/BackButton';
 import { InfoBox } from '@/components/ui/InfoBox';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useHandleBack } from '@/hooks/useHandleBack';
 import { FriendService } from '@/services/friendService';
 import { UserSearchResult } from '@/types';
 import { useRouter } from 'expo-router';
@@ -14,6 +15,11 @@ export default function AddFriendScreen() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<UserSearchResult | null>(null);
   const [isSendingRequest, setIsSendingRequest] = useState(false);
+
+  const handleBack = useHandleBack({
+    name: '(tabs)',
+    params: { screen: 'index' },
+  });
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -57,7 +63,7 @@ export default function AddFriendScreen() {
         Alert.alert('送信完了', '友達リクエストを送信しました', [
           {
             text: 'OK',
-            onPress: () => router.back(),
+            onPress: handleBack,
           },
         ]);
       } else {
@@ -91,12 +97,7 @@ export default function AddFriendScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <View className="px-6 pt-12 pb-4 border-b border-gray-200">
-        <View className="flex-row items-center">
-          <BackButton onPress={() => router.back()} />
-          <Text className="text-2xl font-bold text-gray-800">友達を追加</Text>
-        </View>
-      </View>
+      <ScreenHeader title="友達を追加" onBack={handleBack} />
 
       {/* 検索フォーム */}
       <View className="px-6 py-6">

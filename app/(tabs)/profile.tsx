@@ -1,4 +1,5 @@
 import { Avatar } from '@/components/ui/Avatar';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { StorageService } from '@/services/storageService';
 import * as ImagePicker from 'expo-image-picker';
@@ -106,98 +107,102 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white p-6">
-      <View className="items-center mt-8">
-        {/* アバター */}
-        <View className="relative">
-          <Avatar uri={profile?.avatar_url} size={100} />
-          {isUploadingAvatar && (
-            <View className="absolute inset-0 bg-black/50 rounded-full items-center justify-center">
-              <ActivityIndicator color="white" size="large" />
-            </View>
-          )}
-        </View>
-
-        <TouchableOpacity
-          onPress={handleChangeAvatar}
-          disabled={isUploadingAvatar}
-          className={`mt-4 px-4 py-2 rounded-lg ${
-            isUploadingAvatar ? 'bg-gray-400' : 'bg-blue-500'
-          }`}
-        >
-          <Text className="text-white font-semibold">
-            {isUploadingAvatar ? 'アップロード中...' : '画像を変更'}
-          </Text>
-        </TouchableOpacity>
-
-        <Text className="text-2xl font-bold text-gray-800 mt-4">プロフィール</Text>
-
-        <View className="mt-8 w-full">
-          <View className="bg-gray-50 p-4 rounded-lg mb-4">
-            <Text className="text-sm text-gray-500 mb-2">ユーザーID</Text>
-            {isEditingUserId ? (
-              <View>
-                <TextInput
-                  className="text-lg text-gray-800 border border-gray-300 rounded px-3 py-2 mb-2"
-                  value={newUserId}
-                  onChangeText={setNewUserId}
-                  placeholder="ユーザーIDを入力"
-                  autoCapitalize="none"
-                  editable={!isLoading}
-                />
-                <View className="flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={handleUpdateUserId}
-                    disabled={isLoading}
-                    className="flex-1 bg-app-primary py-2 rounded"
-                  >
-                    <Text className="text-white text-center font-semibold">
-                      {isLoading ? '保存中...' : '保存'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsEditingUserId(false);
-                      setNewUserId(profile?.user_id || '');
-                    }}
-                    disabled={isLoading}
-                    className="flex-1 bg-gray-300 py-2 rounded"
-                  >
-                    <Text className="text-gray-700 text-center font-semibold">キャンセル</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : (
-              <View className="flex-row justify-between items-center">
-                <Text className="text-lg text-gray-800">{profile?.user_id || '未設定'}</Text>
-                <TouchableOpacity onPress={() => setIsEditingUserId(true)}>
-                  <Text className="text-app-primary font-semibold">編集</Text>
-                </TouchableOpacity>
+    <View className="flex-1 bg-white">
+      <ScreenHeader title="プロフィール" />
+      <View className="flex-1 p-6">
+        <View className="items-center mt-4">
+          {/* アバター */}
+          <View className="relative">
+            <Avatar uri={profile?.avatar_url} size={100} />
+            {isUploadingAvatar && (
+              <View className="absolute inset-0 bg-black/50 rounded-full items-center justify-center">
+                <ActivityIndicator color="white" size="large" />
               </View>
             )}
           </View>
 
-          <View className="bg-gray-50 p-4 rounded-lg mb-4">
-            <Text className="text-sm text-gray-500 mb-2">表示名</Text>
-            <Text className="text-lg text-gray-800">{profile?.display_name || 'No name'}</Text>
-          </View>
+          <TouchableOpacity
+            onPress={handleChangeAvatar}
+            disabled={isUploadingAvatar}
+            className={`mt-4 px-4 py-2 rounded-lg ${
+              isUploadingAvatar ? 'bg-gray-400' : 'bg-blue-500'
+            }`}
+          >
+            <Text className="text-white font-semibold">
+              {isUploadingAvatar ? 'アップロード中...' : '画像を変更'}
+            </Text>
+          </TouchableOpacity>
 
-          <View className="bg-gray-50 p-4 rounded-lg mb-4">
-            <Text className="text-sm text-gray-500 mb-2">メールアドレス</Text>
-            <Text className="text-lg text-gray-800">{user?.email || 'No email'}</Text>
-          </View>
-
-          {profile?.bio && (
+          <View className="mt-8 w-full">
             <View className="bg-gray-50 p-4 rounded-lg mb-4">
-              <Text className="text-sm text-gray-500 mb-2">自己紹介</Text>
-              <Text className="text-lg text-gray-800">{profile.bio}</Text>
+              <Text className="text-sm text-gray-500 mb-2">ユーザーID</Text>
+              {isEditingUserId ? (
+                <View>
+                  <TextInput
+                    className="text-lg text-gray-800 border border-gray-300 rounded px-3 py-2 mb-2"
+                    value={newUserId}
+                    onChangeText={setNewUserId}
+                    placeholder="ユーザーIDを入力"
+                    autoCapitalize="none"
+                    editable={!isLoading}
+                  />
+                  <View className="flex-row gap-2">
+                    <TouchableOpacity
+                      onPress={handleUpdateUserId}
+                      disabled={isLoading}
+                      className="flex-1 bg-app-primary py-2 rounded"
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        {isLoading ? '保存中...' : '保存'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsEditingUserId(false);
+                        setNewUserId(profile?.user_id || '');
+                      }}
+                      disabled={isLoading}
+                      className="flex-1 bg-gray-300 py-2 rounded"
+                    >
+                      <Text className="text-gray-700 text-center font-semibold">キャンセル</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-lg text-gray-800">{profile?.user_id || '未設定'}</Text>
+                  <TouchableOpacity onPress={() => setIsEditingUserId(true)}>
+                    <Text className="text-app-primary font-semibold">編集</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
-          )}
-        </View>
 
-        <TouchableOpacity onPress={handleSignOut} className="mt-8 bg-red-500 px-6 py-3 rounded-lg">
-          <Text className="text-white font-semibold">ログアウト</Text>
-        </TouchableOpacity>
+            <View className="bg-gray-50 p-4 rounded-lg mb-4">
+              <Text className="text-sm text-gray-500 mb-2">表示名</Text>
+              <Text className="text-lg text-gray-800">{profile?.display_name || 'No name'}</Text>
+            </View>
+
+            <View className="bg-gray-50 p-4 rounded-lg mb-4">
+              <Text className="text-sm text-gray-500 mb-2">メールアドレス</Text>
+              <Text className="text-lg text-gray-800">{user?.email || 'No email'}</Text>
+            </View>
+
+            {profile?.bio && (
+              <View className="bg-gray-50 p-4 rounded-lg mb-4">
+                <Text className="text-sm text-gray-500 mb-2">自己紹介</Text>
+                <Text className="text-lg text-gray-800">{profile.bio}</Text>
+              </View>
+            )}
+          </View>
+
+          <TouchableOpacity
+            onPress={handleSignOut}
+            className="mt-8 bg-red-500 px-6 py-3 rounded-lg"
+          >
+            <Text className="text-white font-semibold">ログアウト</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

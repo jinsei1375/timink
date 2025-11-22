@@ -6,11 +6,12 @@ import { DateSelector } from '@/components/capsule/DateSelector';
 import { FormInput } from '@/components/capsule/FormInput';
 import { FriendSelector } from '@/components/capsule/FriendSelector';
 import { InfoBox } from '@/components/ui/InfoBox';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { FriendService } from '@/services/friendService';
 import { CapsuleType, Friend } from '@/types';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -38,6 +39,11 @@ export default function CreateCapsuleScreen() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [tempDate, setTempDate] = useState(new Date());
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+
+  const handleBack = useHandleBack({
+    name: '(tabs)',
+    params: { screen: 'capsules' },
+  });
 
   useEffect(() => {
     loadFriends();
@@ -140,15 +146,7 @@ export default function CreateCapsuleScreen() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* ヘッダー */}
-      <View className="bg-white border-b border-gray-200 px-4 pt-12 pb-4">
-        <View className="flex-row items-center justify-between">
-          <Pressable onPress={() => router.back()} className="p-2 -ml-2">
-            <Ionicons name="close" size={24} color="#374151" />
-          </Pressable>
-          <Text className="text-xl font-bold text-gray-900">カプセル作成</Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </View>
+      <ScreenHeader title="カプセル作成" onBack={handleBack} />
 
       <ScrollView className="flex-1">
         <View className="p-4">

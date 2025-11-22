@@ -1,19 +1,13 @@
 import { DiaryCard } from '@/components/diary/DiaryCard';
 import { EmptyState } from '@/components/diary/EmptyState';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { DiaryService, DiaryWithDetails } from '@/services/diaryService';
 import { formatDate } from '@/utils/formatDate';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, TouchableOpacity, View } from 'react-native';
 
 export default function DiariesScreen() {
   const router = useRouter();
@@ -94,27 +88,22 @@ export default function DiariesScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* ヘッダー */}
-      <View className="bg-white px-6 pt-12 pb-4 border-b border-gray-200">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-2xl font-bold text-gray-900">交換日記</Text>
-          <TouchableOpacity
-            onPress={handleCreateDiary}
-            className="bg-app-primary rounded-full p-2 active:opacity-70"
-          >
-            <Ionicons name="add" size={24} color="white" />
+      <ScreenHeader
+        title="交換日記"
+        rightElement={
+          <TouchableOpacity onPress={handleCreateDiary}>
+            <Ionicons name="add-circle-outline" size={28} color="#6C6EE6" />
           </TouchableOpacity>
-        </View>
-      </View>
+        }
+      />
 
-      {/* 日記一覧 */}
       <FlatList
         data={diaries}
         renderItem={renderDiaryCard}
         keyExtractor={keyExtractor}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
-        contentContainerStyle={{ paddingTop: 16, paddingBottom: 80 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         ListEmptyComponent={renderEmptyState}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
       />
     </View>
   );

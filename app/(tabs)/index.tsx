@@ -1,5 +1,6 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { FriendService } from '@/services/friendService';
 import { Friend, FriendRequest } from '@/types';
@@ -78,19 +79,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* ヘッダー */}
-      <View className="px-6 pt-8 pb-4 border-b border-gray-200">
-        <View className="flex-row justify-between items-center">
-          <View></View>
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/add-friend')}
-            className="bg-app-primary px-4 py-2 rounded-lg flex-row items-center"
-          >
-            <IconSymbol name="person.badge.plus" size={20} color="#fff" />
-            <Text className="text-white font-semibold ml-2">友達追加</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <ScreenHeader title="ホーム" />
 
       <FlatList
         data={[]}
@@ -136,7 +125,16 @@ export default function HomeScreen() {
 
             {/* 友達一覧 */}
             <View className="px-6 py-4">
-              <Text className="text-lg font-bold text-gray-800 mb-3">友達 ({friends.length})</Text>
+              <View className="flex-row justify-between items-center mb-3">
+                <Text className="text-lg font-bold text-gray-800">友達 ({friends.length})</Text>
+                <TouchableOpacity
+                  onPress={() => router.push('/(tabs)/add-friend')}
+                  className="bg-app-primary px-3 py-1.5 rounded-lg flex-row items-center"
+                >
+                  <IconSymbol name="person.badge.plus" size={16} color="#fff" />
+                  <Text className="text-white text-sm font-semibold ml-1">追加</Text>
+                </TouchableOpacity>
+              </View>
               {friends.length === 0 ? (
                 <View className="bg-gray-50 rounded-lg p-8 items-center">
                   <IconSymbol name="person.2" size={48} color="#9CA3AF" />

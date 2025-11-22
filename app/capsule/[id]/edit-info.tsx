@@ -1,5 +1,7 @@
 import { InfoBox } from '@/components/ui/InfoBox';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,6 +26,11 @@ export default function EditCapsuleInfoScreen() {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const handleBack = useHandleBack({
+    name: 'capsule/[id]',
+    params: { id },
+  });
 
   useEffect(() => {
     if (id && user) {
@@ -66,7 +73,7 @@ export default function EditCapsuleInfoScreen() {
       Alert.alert('保存完了', 'カプセル情報を更新しました', [
         {
           text: 'OK',
-          onPress: () => router.back(),
+          onPress: handleBack,
         },
       ]);
     } catch (error) {
@@ -100,7 +107,7 @@ export default function EditCapsuleInfoScreen() {
       <View className="flex-1 bg-white">
         <View className="bg-app-primary p-6 pb-4">
           <View className="flex-row items-center justify-between">
-            <Pressable onPress={() => router.back()}>
+            <Pressable onPress={handleBack}>
               <Ionicons name="close" size={28} color="white" />
             </Pressable>
             <Text className="text-white text-lg font-bold">カプセル情報編集</Text>
@@ -116,7 +123,7 @@ export default function EditCapsuleInfoScreen() {
           <Text className="text-base text-gray-600 text-center mb-6">
             このカプセルの情報を編集する権限がありません。
           </Text>
-          <Pressable onPress={() => router.back()} className="bg-app-primary px-8 py-3 rounded-xl">
+          <Pressable onPress={handleBack} className="bg-app-primary px-8 py-3 rounded-xl">
             <Text className="text-white font-semibold">戻る</Text>
           </Pressable>
         </View>
@@ -127,21 +134,7 @@ export default function EditCapsuleInfoScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <View className="bg-app-primary p-6 pb-4">
-        <View className="flex-row items-center justify-between mb-4">
-          <Pressable onPress={() => router.back()}>
-            <Ionicons name="close" size={28} color="white" />
-          </Pressable>
-          <Text className="text-white text-lg font-bold">カプセル情報編集</Text>
-          <Pressable onPress={handleSave} disabled={saving}>
-            {saving ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Ionicons name="checkmark" size={28} color="white" />
-            )}
-          </Pressable>
-        </View>
-      </View>
+      <ScreenHeader title="カプセル情報編集" onBack={handleBack} />
 
       {/* コンテンツ */}
       <ScrollView className="flex-1 p-6">
@@ -156,7 +149,6 @@ export default function EditCapsuleInfoScreen() {
             placeholder="タイムカプセルのタイトル"
             className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-base"
             maxLength={50}
-            autoFocus
           />
           <Text className="text-gray-400 text-sm mt-1 text-right">{title.length}/50</Text>
         </View>
@@ -184,6 +176,21 @@ export default function EditCapsuleInfoScreen() {
           message={`タイトルと説明文はいつでも編集できます。\n変更はすべてのメンバーに反映されます。`}
         />
       </ScrollView>
+
+      {/* 保存ボタン */}
+      <View className="bg-white border-t border-gray-200 p-4">
+        <Pressable
+          onPress={handleSave}
+          disabled={saving}
+          className={`rounded-xl py-4 items-center ${saving ? 'bg-gray-400' : 'bg-app-primary'}`}
+        >
+          {saving ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text className="text-white text-base font-semibold">変更を保存</Text>
+          )}
+        </Pressable>
+      </View>
     </View>
   );
 }
