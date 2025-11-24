@@ -26,7 +26,7 @@ export const DiaryCard = React.memo<DiaryCardProps>(
     return (
       <TouchableOpacity
         onPress={handlePress}
-        className="bg-white mx-4 mb-3 rounded-2xl p-4 shadow-sm border border-gray-100"
+        className="bg-white mb-3 rounded-2xl p-4 shadow-sm border border-gray-100"
         activeOpacity={0.7}
       >
         {/* ヘッダー部分 */}
