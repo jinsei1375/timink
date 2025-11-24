@@ -5,15 +5,17 @@ import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
 import { FriendService } from '@/services/friendService';
 import { Friend } from '@/types';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -29,6 +31,16 @@ export default function CreateDiaryScreen() {
     name: '(tabs)',
     params: { screen: 'diaries' },
   });
+
+  // 画面から離れるときにフォームをリセット
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setTitle('');
+        setSelectedFriends([]);
+      };
+    }, [])
+  );
 
   useEffect(() => {
     loadFriends();
@@ -71,7 +83,7 @@ export default function CreateDiaryScreen() {
         Alert.alert('作成完了', '交換日記を作成しました', [
           {
             text: 'OK',
-            onPress: handleBack,
+            onPress: () => router.replace(`/diary/${result.data.id}` as any),
           },
         ]);
       } else {
@@ -121,14 +133,54 @@ export default function CreateDiaryScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <ScreenHeader
-        title="交換日記を作成"
-        onBack={handleBack}
-        rightElement={
-          <TouchableOpacity
+      <ScreenHeader title="交換日記を作成" onBack={handleBack} />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      >
+        <View className="flex-1 px-6">
+          {/* タイトル入力 */}
+          <View className="py-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">タイトル</Text>
+            <TextInput
+              value={title}
+              onChangeText={setTitle}
+              placeholder="例: 大学時代の思い出"
+              placeholderTextColor="#9CA3AF"
+              className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800 text-base"
+              maxLength={50}
+            />
+            <Text className="text-xs text-gray-400 mt-1 text-right">{title.length}/50</Text>
+          </View>
+
+          {/* 友達選択 */}
+          <View className="flex-1">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              メンバーを選択 ({selectedFriends.length}人選択中)
+            </Text>
+
+            {friends.length === 0 ? (
+              renderEmptyState()
+            ) : (
+              <FlatList
+                data={friends}
+                renderItem={renderFriendItem}
+                keyExtractor={keyExtractor}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              />
+            )}
+          </View>
+        </View>
+
+        {/* 作成ボタン */}
+        <View className="p-4 border-t border-gray-100 bg-white">
+          <Pressable
             onPress={handleCreate}
             disabled={isCreating || !title.trim() || selectedFriends.length === 0}
-            className={`px-4 py-2 rounded-lg ${
+            className={`w-full py-4 rounded-xl flex-row items-center justify-center ${
               isCreating || !title.trim() || selectedFriends.length === 0
                 ? 'bg-gray-300'
                 : 'bg-app-primary'
@@ -137,46 +189,11 @@ export default function CreateDiaryScreen() {
             {isCreating ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text className="text-white font-semibold">作成</Text>
+              <Text className="text-white font-semibold text-base">作成</Text>
             )}
-          </TouchableOpacity>
-        }
-      />
-
-      <View className="flex-1 px-6">
-        {/* タイトル入力 */}
-        <View className="py-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">タイトル</Text>
-          <TextInput
-            value={title}
-            onChangeText={setTitle}
-            placeholder="例: 大学時代の思い出"
-            placeholderTextColor="#9CA3AF"
-            className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800 text-base"
-            maxLength={50}
-          />
-          <Text className="text-xs text-gray-400 mt-1 text-right">{title.length}/50</Text>
+          </Pressable>
         </View>
-
-        {/* 友達選択 */}
-        <View className="flex-1">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">
-            メンバーを選択 ({selectedFriends.length}人選択中)
-          </Text>
-
-          {friends.length === 0 ? (
-            renderEmptyState()
-          ) : (
-            <FlatList
-              data={friends}
-              renderItem={renderFriendItem}
-              keyExtractor={keyExtractor}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 20 }}
-            />
-          )}
-        </View>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }

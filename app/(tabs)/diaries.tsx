@@ -38,7 +38,7 @@ export default function DiariesScreen() {
   };
 
   const handleCreateDiary = useCallback(() => {
-    router.push('/(tabs)/create-diary');
+    router.push('/diary/create');
   }, [router]);
 
   const handleDiaryPress = useCallback(

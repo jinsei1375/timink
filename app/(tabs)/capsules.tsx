@@ -63,7 +63,7 @@ export default function CapsulesScreen() {
   };
 
   const handleCreatePress = () => {
-    router.push('/(tabs)/create-capsule' as any);
+    router.push('/capsule/create');
   };
 
   const filteredCapsules = capsules.filter((capsule) => {

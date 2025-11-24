@@ -12,8 +12,8 @@ import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { FriendService } from '@/services/friendService';
 import { CapsuleType, Friend } from '@/types';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -44,6 +44,19 @@ export default function CreateCapsuleScreen() {
     name: '(tabs)',
     params: { screen: 'capsules' },
   });
+
+  // 画面から離れるときにフォームをリセット
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setTitle('');
+        setDescription('');
+        setCapsuleType(CapsuleType.Personal);
+        setUnlockDate(new Date());
+        setSelectedFriends([]);
+      };
+    }, [])
+  );
 
   useEffect(() => {
     loadFriends();

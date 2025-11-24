@@ -1,5 +1,4 @@
 import { DiaryPageView } from '@/components/diary/DiaryPageView';
-import { DiaryPostForm } from '@/components/diary/DiaryPostForm';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,13 +9,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   Dimensions,
   FlatList,
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
+  Pressable,
   RefreshControl,
   Text,
   View,
@@ -150,25 +147,6 @@ export default function DiaryDetailScreen() {
     loadDiaryData();
   };
 
-  const handlePost = async (content: string) => {
-    if (!id || !profile) return;
-
-    try {
-      const result = await DiaryService.createEntry(id, content);
-
-      if (result.success) {
-        // 投稿成功時の処理はリアルタイム更新に任せるが、
-        // フォームのリセットなどのために成功を返す必要がある場合はここで処理
-        Alert.alert('投稿完了', '日記を投稿しました！');
-      } else {
-        Alert.alert('エラー', '投稿に失敗しました');
-      }
-    } catch (error) {
-      console.error('投稿エラー:', error);
-      Alert.alert('エラー', '投稿中にエラーが発生しました');
-    }
-  };
-
   const renderPage = useCallback(
     ({ item, index }: { item: DiaryEntry & { author: Profile }; index: number }) => (
       <View style={{ width: SCREEN_WIDTH }}>
@@ -217,60 +195,72 @@ export default function DiaryDetailScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
-      <View className="flex-1 bg-gradient-to-b from-gray-100 to-gray-50">
-        <ScreenHeader
-          title={diary.title}
-          subtitle={entries.length > 0 ? `📖 ${entries.length}ページの思い出` : undefined}
-          onBack={handleBack}
-        />
+    <View className="flex-1 bg-gradient-to-b from-gray-100 to-gray-50">
+      <ScreenHeader
+        title={diary.title}
+        subtitle={entries.length > 0 ? `📖 ${entries.length}ページの思い出` : undefined}
+        onBack={handleBack}
+      />
 
-        {/* ページビュー（横スクロール） */}
-        {entries.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          <View className="flex-1">
-            <Animated.FlatList
-              ref={flatListRef}
-              data={entries}
-              renderItem={renderPage}
-              keyExtractor={keyExtractor}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              snapToAlignment="center"
-              decelerationRate="fast"
-              scrollEventThrottle={16}
-              keyboardShouldPersistTaps="handled"
-              onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
-                useNativeDriver: true,
-              })}
-              onScrollBeginDrag={() => Keyboard.dismiss()}
-              getItemLayout={(data, index) => ({
-                length: SCREEN_WIDTH,
-                offset: SCREEN_WIDTH * index,
-                index,
-              })}
-              contentContainerStyle={{ flexGrow: 1 }}
-              refreshControl={
-                <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
-              }
-            />
+      {/* ページビュー（横スクロール） */}
+      {entries.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <View className="flex-1">
+          <Animated.FlatList
+            ref={flatListRef}
+            data={entries}
+            renderItem={renderPage}
+            keyExtractor={keyExtractor}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            snapToAlignment="center"
+            decelerationRate="fast"
+            scrollEventThrottle={16}
+            keyboardShouldPersistTaps="handled"
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+              useNativeDriver: true,
+            })}
+            onScrollBeginDrag={() => Keyboard.dismiss()}
+            getItemLayout={(data, index) => ({
+              length: SCREEN_WIDTH,
+              offset: SCREEN_WIDTH * index,
+              index,
+            })}
+            contentContainerStyle={{ flexGrow: 1 }}
+            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+          />
+        </View>
+      )}
+
+      {/* 投稿ボタンまたは投稿不可メッセージ */}
+      <View className="bg-white border-t border-gray-200 p-4 pb-8">
+        {canPost ? (
+          <Pressable
+            onPress={() => router.push(`/diary/${id}/new-entry`)}
+            className="bg-app-primary rounded-xl py-4 items-center flex-row justify-center"
+          >
+            <Text className="text-white text-base font-semibold">今日の出来事を書く</Text>
+          </Pressable>
+        ) : nextPostTime ? (
+          <View className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <Text className="text-amber-800 text-center font-semibold mb-1">
+              今日はもう投稿済みです
+            </Text>
+            <Text className="text-amber-600 text-sm text-center">
+              次の投稿は
+              {(() => {
+                const diff = nextPostTime.getTime() - new Date().getTime();
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                return `${hours > 0 ? hours + '時間' : ''}${minutes > 0 ? minutes + '分' : ''}`;
+              })()}
+              後に可能です
+            </Text>
           </View>
-        )}
-
-        {/* 投稿フォーム */}
-        <DiaryPostForm
-          onSubmit={handlePost}
-          canPost={canPost}
-          nextPostTime={nextPostTime}
-          maxLength={500}
-        />
+        ) : null}
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
