@@ -10,6 +10,8 @@ export default function ProfileScreen() {
   const { user, profile, signOut, updateProfile, refreshProfile } = useAuth();
   const [isEditingUserId, setIsEditingUserId] = useState(false);
   const [newUserId, setNewUserId] = useState(profile?.user_id || '');
+  const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
+  const [newDisplayName, setNewDisplayName] = useState(profile?.display_name || '');
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
@@ -55,6 +57,30 @@ export default function ProfileScreen() {
     } catch (error: any) {
       console.error('❌ ユーザーID更新エラー:', error);
       Alert.alert('エラー', error.message || 'ユーザーIDの更新に失敗しました');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateDisplayName = async () => {
+    if (!user || !newDisplayName.trim()) {
+      Alert.alert('エラー', '表示名を入力してください');
+      return;
+    }
+
+    if (newDisplayName.length > 50) {
+      Alert.alert('エラー', '表示名は50文字以内で設定してください');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await updateProfile({ display_name: newDisplayName });
+      Alert.alert('成功', '表示名を更新しました');
+      setIsEditingDisplayName(false);
+    } catch (error: any) {
+      console.error('❌ 表示名更新エラー:', error);
+      Alert.alert('エラー', error.message || '表示名の更新に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -171,7 +197,12 @@ export default function ProfileScreen() {
               ) : (
                 <View className="flex-row justify-between items-center">
                   <Text className="text-lg text-gray-800">{profile?.user_id || '未設定'}</Text>
-                  <TouchableOpacity onPress={() => setIsEditingUserId(true)}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setNewUserId(profile?.user_id || '');
+                      setIsEditingUserId(true);
+                    }}
+                  >
                     <Text className="text-app-primary font-semibold">編集</Text>
                   </TouchableOpacity>
                 </View>
@@ -180,7 +211,52 @@ export default function ProfileScreen() {
 
             <View className="bg-gray-50 p-4 rounded-lg mb-4">
               <Text className="text-sm text-gray-500 mb-2">表示名</Text>
-              <Text className="text-lg text-gray-800">{profile?.display_name || 'No name'}</Text>
+              {isEditingDisplayName ? (
+                <View>
+                  <TextInput
+                    className="text-lg text-gray-800 border border-gray-300 rounded px-3 py-2 mb-2"
+                    value={newDisplayName}
+                    onChangeText={setNewDisplayName}
+                    placeholder="表示名を入力"
+                    editable={!isLoading}
+                  />
+                  <View className="flex-row gap-2">
+                    <TouchableOpacity
+                      onPress={handleUpdateDisplayName}
+                      disabled={isLoading}
+                      className="flex-1 bg-app-primary py-2 rounded"
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        {isLoading ? '保存中...' : '保存'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsEditingDisplayName(false);
+                        setNewDisplayName(profile?.display_name || '');
+                      }}
+                      disabled={isLoading}
+                      className="flex-1 bg-gray-300 py-2 rounded"
+                    >
+                      <Text className="text-gray-700 text-center font-semibold">キャンセル</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-lg text-gray-800">
+                    {profile?.display_name || 'No name'}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setNewDisplayName(profile?.display_name || '');
+                      setIsEditingDisplayName(true);
+                    }}
+                  >
+                    <Text className="text-app-primary font-semibold">編集</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
 
             <View className="bg-gray-50 p-4 rounded-lg mb-4">
