@@ -5,8 +5,9 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 interface FriendSelectItemProps {
   friend: Friend;
-  isSelected: boolean;
-  onToggle: (friendId: string) => void;
+  isSelected?: boolean;
+  onToggle?: (friendId: string) => void;
+  onPress?: () => void;
   disabled?: boolean;
 }
 
@@ -14,18 +15,24 @@ interface FriendSelectItemProps {
  * 友達選択アイテムコンポーネント
  */
 export const FriendSelectItem = React.memo<FriendSelectItemProps>(
-  ({ friend, isSelected, onToggle, disabled }) => {
+  ({ friend, isSelected, onToggle, onPress, disabled }) => {
     const handlePress = useCallback(() => {
       if (disabled) return;
-      onToggle(friend.profile.id);
-    }, [friend.profile.id, onToggle, disabled]);
+      if (onToggle) {
+        onToggle(friend.profile.id);
+      } else if (onPress) {
+        onPress();
+      }
+    }, [friend.profile.id, onToggle, onPress, disabled]);
+
+    const isInteractive = !!(onToggle || onPress);
 
     return (
       <TouchableOpacity
         onPress={handlePress}
-        disabled={disabled}
-        className={`flex-row items-center p-4 mb-2 rounded-xl ${
-          isSelected ? 'bg-purple-50 border-2 border-app-primary' : 'bg-gray-50'
+        disabled={disabled || !isInteractive}
+        className={`flex-row items-center p-4 mb-2 rounded-xl border ${
+          isSelected ? 'bg-purple-50 border-app-primary' : 'bg-white border-gray-200'
         } ${disabled ? 'opacity-50' : ''}`}
         activeOpacity={0.7}
       >

@@ -4,7 +4,7 @@ import { CreateConfirmModal } from '@/components/capsule/CreateConfirmModal';
 import { DatePickerModal } from '@/components/capsule/DatePickerModal';
 import { DateSelector } from '@/components/capsule/DateSelector';
 import { FormInput } from '@/components/capsule/FormInput';
-import { FriendSelector } from '@/components/capsule/FriendSelector';
+import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
@@ -196,12 +196,26 @@ export default function CreateCapsuleScreen() {
               {friends.length === 0 ? (
                 <InfoBox type="warning" message="友達がいません。先に友達を追加してください。" />
               ) : (
-                <FriendSelector
-                  friends={friends}
-                  selectedFriendIds={selectedFriends}
-                  onToggleFriend={toggleFriendSelection}
-                  maxSelection={capsuleType === CapsuleType.OneToOne ? 1 : undefined}
-                />
+                <View>
+                  {friends.map((friend) => {
+                    const isSelected = selectedFriends.includes(friend.profile.id);
+                    const maxSelection = capsuleType === CapsuleType.OneToOne ? 1 : undefined;
+                    const isDisabled = !!(
+                      maxSelection &&
+                      selectedFriends.length >= maxSelection &&
+                      !isSelected
+                    );
+                    return (
+                      <FriendSelectItem
+                        key={friend.profile.id}
+                        friend={friend}
+                        isSelected={isSelected}
+                        onToggle={toggleFriendSelection}
+                        disabled={isDisabled}
+                      />
+                    );
+                  })}
+                </View>
               )}
             </View>
           )}

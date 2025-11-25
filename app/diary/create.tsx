@@ -1,5 +1,5 @@
 import { EmptyState } from '@/components/diary/EmptyState';
-import { FriendSelectItem } from '@/components/diary/FriendSelectItem';
+import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
@@ -124,14 +124,14 @@ export default function CreateDiaryScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
+      <View className="flex-1 justify-center items-center bg-gray-50">
         <ActivityIndicator size="large" color="#6C6EE6" />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-gray-50">
       {/* ヘッダー */}
       <ScreenHeader title="交換日記を作成" onBack={handleBack} />
 
@@ -149,7 +149,7 @@ export default function CreateDiaryScreen() {
               onChangeText={setTitle}
               placeholder="例: 大学時代の思い出"
               placeholderTextColor="#9CA3AF"
-              className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800 text-base"
+              className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
               maxLength={50}
             />
             <Text className="text-xs text-gray-400 mt-1 text-right">{title.length}/50</Text>
@@ -176,7 +176,7 @@ export default function CreateDiaryScreen() {
         </View>
 
         {/* 作成ボタン */}
-        <View className="p-4 border-t border-gray-100 bg-white">
+        <View className="p-4 border-t border-gray-100 bg-gray-50">
           <Pressable
             onPress={handleCreate}
             disabled={isCreating || !title.trim() || selectedFriends.length === 0}

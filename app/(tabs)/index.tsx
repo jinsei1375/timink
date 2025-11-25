@@ -1,4 +1,4 @@
-import { Avatar } from '@/components/ui/Avatar';
+import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
@@ -150,20 +150,7 @@ export default function HomeScreen() {
                   </TouchableOpacity>
                 </View>
               ) : (
-                friends.map((friend) => (
-                  <View
-                    key={friend.id}
-                    className="bg-gray-50 rounded-lg p-4 mb-2 flex-row items-center"
-                  >
-                    <Avatar uri={friend.profile.avatar_url} size={48} className="mr-3" />
-                    <View className="flex-1">
-                      <Text className="text-base font-semibold text-gray-800">
-                        {friend.profile.display_name || '名前なし'}
-                      </Text>
-                      <Text className="text-sm text-gray-500">@{friend.profile.user_id}</Text>
-                    </View>
-                  </View>
-                ))
+                friends.map((friend) => <FriendSelectItem key={friend.id} friend={friend} />)
               )}
             </View>
           </>
