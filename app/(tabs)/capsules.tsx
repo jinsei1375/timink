@@ -1,4 +1,5 @@
 import { CapsuleCard } from '@/components/capsule/CapsuleCard';
+import { CapsuleFilter } from '@/components/capsule/CapsuleFilter';
 import { EmptyState } from '@/components/capsule/EmptyState';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,15 +8,7 @@ import { CapsuleStatus, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, TouchableOpacity, View } from 'react-native';
 
 export default function CapsulesScreen() {
   const { user } = useAuth();
@@ -91,65 +84,15 @@ export default function CapsulesScreen() {
           </TouchableOpacity>
         }
       />
-
+      <CapsuleFilter filter={filter} onFilterChange={setFilter} />
       <FlatList
         data={filteredCapsules}
         renderItem={({ item }) => (
           <CapsuleCard capsule={item} onPress={() => handleCapsulePress(item.id)} />
         )}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-        ListHeaderComponent={
-          <View className="flex-row gap-2 mb-4">
-            <Pressable
-              onPress={() => setFilter('all')}
-              className={`px-4 py-2 rounded-full border ${
-                filter === 'all' ? 'bg-app-primary border-app-primary' : 'bg-white border-gray-200'
-              }`}
-            >
-              <Text
-                className={`text-sm font-medium ${
-                  filter === 'all' ? 'text-white' : 'text-gray-600'
-                }`}
-              >
-                すべて
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setFilter(CapsuleStatus.Locked)}
-              className={`px-4 py-2 rounded-full border ${
-                filter === CapsuleStatus.Locked
-                  ? 'bg-app-primary border-app-primary'
-                  : 'bg-white border-gray-200'
-              }`}
-            >
-              <Text
-                className={`text-sm font-medium ${
-                  filter === CapsuleStatus.Locked ? 'text-white' : 'text-gray-600'
-                }`}
-              >
-                ロック中
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setFilter(CapsuleStatus.Unlocked)}
-              className={`px-4 py-2 rounded-full border ${
-                filter === CapsuleStatus.Unlocked
-                  ? 'bg-app-primary border-app-primary'
-                  : 'bg-white border-gray-200'
-              }`}
-            >
-              <Text
-                className={`text-sm font-medium ${
-                  filter === CapsuleStatus.Unlocked ? 'text-white' : 'text-gray-600'
-                }`}
-              >
-                開封済み
-              </Text>
-            </Pressable>
-          </View>
-        }
         ListEmptyComponent={
           <EmptyState
             title="タイムカプセルがありません"

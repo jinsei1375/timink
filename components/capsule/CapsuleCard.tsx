@@ -10,7 +10,7 @@ interface CapsuleCardProps {
 
 export function CapsuleCard({ capsule, onPress }: CapsuleCardProps) {
   const timeRemaining = capsuleService.getTimeUntilUnlock(capsule.unlock_at);
-  const isLocked = capsule.status === CapsuleStatus.Locked && !timeRemaining.isUnlockable;
+  const isLocked = capsule.status === CapsuleStatus.Locked;
 
   const getCapsuleTypeLabel = () => {
     switch (capsule.capsule_type) {
@@ -26,8 +26,12 @@ export function CapsuleCard({ capsule, onPress }: CapsuleCardProps) {
   };
 
   const getTimeRemainingText = () => {
+    if (capsule.status === CapsuleStatus.Unlocked) {
+      return '開封済み';
+    }
+
     if (timeRemaining.isUnlockable) {
-      return '開封可能！';
+      return '開封可能';
     }
 
     const parts = [];
@@ -78,7 +82,11 @@ export function CapsuleCard({ capsule, onPress }: CapsuleCardProps) {
           <Ionicons name="time-outline" size={16} color="#6B7280" />
           <Text
             className={`text-sm font-medium ${
-              timeRemaining.isUnlockable ? 'text-green-600' : 'text-gray-700'
+              capsule.status === CapsuleStatus.Unlocked
+                ? 'text-gray-500'
+                : timeRemaining.isUnlockable
+                  ? 'text-green-600'
+                  : 'text-gray-700'
             }`}
           >
             {getTimeRemainingText()}
