@@ -7,7 +7,14 @@ import { formatDate } from '@/utils/formatDate';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function DiariesScreen() {
   const router = useRouter();
@@ -19,7 +26,14 @@ export default function DiariesScreen() {
   const loadDiaries = async () => {
     try {
       const data = await DiaryService.getMyDiaries();
-      setDiaries(data);
+      // ピン留め順 > 更新日順 でソート
+      const sortedData = data.sort((a, b) => {
+        if (a.is_pinned === b.is_pinned) {
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        }
+        return a.is_pinned ? -1 : 1;
+      });
+      setDiaries(sortedData);
     } catch (error) {
       console.error('データ取得エラー:', error);
     } finally {
@@ -48,6 +62,34 @@ export default function DiariesScreen() {
     [router]
   );
 
+  const handleLongPress = useCallback(
+    (diaryId: string) => {
+      const diary = diaries.find((d) => d.id === diaryId);
+      if (!diary || !profile) return;
+
+      Alert.alert(
+        diary.title,
+        diary.is_pinned ? 'ピン留めを外しますか？' : 'この日記をピン留めしますか？',
+        [
+          { text: 'キャンセル', style: 'cancel' },
+          {
+            text: diary.is_pinned ? '外す' : 'ピン留め',
+            onPress: async () => {
+              try {
+                await DiaryService.togglePin(diary.id, profile.id, !!diary.is_pinned);
+                loadDiaries(); // リロード
+              } catch (error) {
+                console.error(error);
+                Alert.alert('エラー', 'ピン留めの更新に失敗しました');
+              }
+            },
+          },
+        ]
+      );
+    },
+    [diaries, profile]
+  );
+
   const renderDiaryCard = useCallback(
     ({ item }: { item: DiaryWithDetails }) => {
       if (!profile) return null;
@@ -56,11 +98,12 @@ export default function DiariesScreen() {
           diary={item}
           currentUserId={profile.id}
           onPress={handleDiaryPress}
+          onLongPress={handleLongPress}
           formatDate={formatDate}
         />
       );
     },
-    [profile, handleDiaryPress]
+    [profile, handleDiaryPress, handleLongPress]
   );
 
   const keyExtractor = useCallback((item: DiaryWithDetails) => item.id, []);

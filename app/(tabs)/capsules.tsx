@@ -8,7 +8,14 @@ import { CapsuleStatus, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function CapsulesScreen() {
   const { user } = useAuth();
@@ -24,7 +31,14 @@ export default function CapsulesScreen() {
 
     try {
       const data = await capsuleService.getUserCapsules(user.id);
-      setCapsules(data);
+      // ピン留め順 > 作成日順 でソート
+      const sortedData = data.sort((a, b) => {
+        if (a.is_pinned === b.is_pinned) {
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+        return a.is_pinned ? -1 : 1;
+      });
+      setCapsules(sortedData);
     } catch (error) {
       console.error('Error loading capsules:', error);
     } finally {
@@ -53,6 +67,29 @@ export default function CapsulesScreen() {
 
   const handleCapsulePress = (capsuleId: string) => {
     router.push(`/capsule/${capsuleId}` as any);
+  };
+
+  const handleLongPress = (capsule: CapsuleWithMembers) => {
+    Alert.alert(
+      capsule.title,
+      capsule.is_pinned ? 'ピン留めを外しますか？' : 'このカプセルをピン留めしますか？',
+      [
+        { text: 'キャンセル', style: 'cancel' },
+        {
+          text: capsule.is_pinned ? '外す' : 'ピン留め',
+          onPress: async () => {
+            if (!user) return;
+            try {
+              await capsuleService.togglePin(capsule.id, user.id, !!capsule.is_pinned);
+              loadCapsules(); // リロード
+            } catch (error) {
+              console.error(error);
+              Alert.alert('エラー', 'ピン留めの更新に失敗しました');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleCreatePress = () => {
@@ -88,7 +125,11 @@ export default function CapsulesScreen() {
       <FlatList
         data={filteredCapsules}
         renderItem={({ item }) => (
-          <CapsuleCard capsule={item} onPress={() => handleCapsulePress(item.id)} />
+          <CapsuleCard
+            capsule={item}
+            onPress={() => handleCapsulePress(item.id)}
+            onLongPress={() => handleLongPress(item)}
+          />
         )}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}

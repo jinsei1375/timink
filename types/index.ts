@@ -19,6 +19,7 @@ export interface Diary {
   created_by: string;
   created_at: string;
   updated_at: string;
+  is_pinned: boolean;
 }
 
 // Diary Entry Types
@@ -120,6 +121,7 @@ export interface Capsule {
   status: CapsuleStatus;
   unlocked_at?: string;
   updated_at: string;
+  is_pinned: boolean;
 }
 
 export interface CapsuleMember {

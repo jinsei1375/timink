@@ -1,4 +1,6 @@
+import { PinBadge } from '@/components/ui/PinBadge';
 import { capsuleService } from '@/services/capsuleService';
+
 import { CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
@@ -6,9 +8,10 @@ import { Pressable, Text, View } from 'react-native';
 interface CapsuleCardProps {
   capsule: CapsuleWithMembers;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
-export function CapsuleCard({ capsule, onPress }: CapsuleCardProps) {
+export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps) {
   const timeRemaining = capsuleService.getTimeUntilUnlock(capsule.unlock_at);
   const isLocked = capsule.status === CapsuleStatus.Locked;
 
@@ -47,11 +50,13 @@ export function CapsuleCard({ capsule, onPress }: CapsuleCardProps) {
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       className="bg-white rounded-2xl p-4 mb-4 border border-gray-200 active:opacity-70"
     >
       {/* ヘッダー */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center gap-2">
+          {capsule.is_pinned && <PinBadge className="mr-1.5" size={12} />}
           <Ionicons
             name={isLocked ? 'lock-closed' : 'lock-open'}
             size={20}

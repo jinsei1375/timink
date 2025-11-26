@@ -1,4 +1,6 @@
+import { PinBadge } from '@/components/ui/PinBadge';
 import { DiaryWithDetails } from '@/services/diaryService';
+
 import React, { useCallback } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { DiaryEntryPreview } from './DiaryEntryPreview';
@@ -8,6 +10,7 @@ interface DiaryCardProps {
   diary: DiaryWithDetails;
   currentUserId: string;
   onPress: (diaryId: string) => void;
+  onLongPress?: (diaryId: string) => void;
   formatDate: (dateString: string) => string;
 }
 
@@ -15,7 +18,7 @@ interface DiaryCardProps {
  * 交換日記カードを表示するコンポーネント
  */
 export const DiaryCard = React.memo<DiaryCardProps>(
-  ({ diary, currentUserId, onPress, formatDate }) => {
+  ({ diary, currentUserId, onPress, onLongPress, formatDate }) => {
     const otherMembers = diary.members.filter((m) => m.id !== currentUserId);
     const memberNames = otherMembers.map((m) => m.display_name || '名前なし').join(', ');
 
@@ -23,9 +26,16 @@ export const DiaryCard = React.memo<DiaryCardProps>(
       onPress(diary.id);
     }, [diary.id, onPress]);
 
+    const handleLongPress = useCallback(() => {
+      if (onLongPress) {
+        onLongPress(diary.id);
+      }
+    }, [diary.id, onLongPress]);
+
     return (
       <TouchableOpacity
         onPress={handlePress}
+        onLongPress={handleLongPress}
         className="bg-white mb-3 rounded-2xl p-4 shadow-sm border border-gray-100"
         activeOpacity={0.7}
       >
@@ -39,9 +49,12 @@ export const DiaryCard = React.memo<DiaryCardProps>(
 
             {/* タイトル */}
             <View className="flex-1">
-              <Text className="text-base font-bold text-gray-800" numberOfLines={1}>
-                {diary.title}
-              </Text>
+              <View className="flex-row items-center">
+                {diary.is_pinned && <PinBadge className="mr-1.5" size={12} />}
+                <Text className="text-base font-bold text-gray-800 flex-1" numberOfLines={1}>
+                  {diary.title}
+                </Text>
+              </View>
               <Text className="text-xs text-gray-500 mt-0.5" numberOfLines={1}>
                 {memberNames}
               </Text>

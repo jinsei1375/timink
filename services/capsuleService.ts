@@ -24,7 +24,8 @@ class CapsuleService {
           user_id,
           role,
           status,
-          joined_at
+          joined_at,
+          is_pinned
         )
       `
       )
@@ -54,15 +55,35 @@ class CapsuleService {
           .select('*', { count: 'exact', head: true })
           .eq('capsule_id', capsule.id);
 
+        // 自分のメンバー情報を取得（is_pinnedのため）
+        const myMemberInfo = capsule.members.find((m: any) => m.user_id === userId);
+
         return {
           ...capsule,
           creator: creatorProfile || undefined,
           contents_count: count || 0,
+          is_pinned: myMemberInfo?.is_pinned || false,
         };
       })
     );
 
     return capsulesWithCount;
+  }
+
+  /**
+   * ピン留め状態を切り替え
+   */
+  async togglePin(capsuleId: string, userId: string, currentStatus: boolean): Promise<void> {
+    const { error } = await supabase
+      .from('capsule_members')
+      .update({ is_pinned: !currentStatus })
+      .eq('capsule_id', capsuleId)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error toggling pin:', error);
+      throw error;
+    }
   }
 
   /**

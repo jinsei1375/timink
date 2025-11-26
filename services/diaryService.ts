@@ -13,6 +13,7 @@ export interface DiaryWithDetails {
   members: Profile[];
   latest_entry?: DiaryEntry & { author: Profile };
   unread_count: number;
+  is_pinned: boolean;
 }
 
 export class DiaryService {
@@ -29,12 +30,14 @@ export class DiaryService {
       // 自分が参加している日記のIDを取得
       const { data: memberships, error: membershipError } = await supabase
         .from('diary_members')
-        .select('diary_id')
+        .select('diary_id, is_pinned')
         .eq('profile_id', user.id);
 
       if (membershipError) throw membershipError;
+
       if (!memberships || memberships.length === 0) return [];
 
+      const diaryMap = new Map(memberships.map((m) => [m.diary_id, m.is_pinned]));
       const diaryIds = memberships.map((m) => m.diary_id);
 
       // 日記情報を取得
@@ -70,6 +73,7 @@ export class DiaryService {
             members: members?.map((m: any) => m.profile) || [],
             latest_entry: latestEntry || undefined,
             unread_count: 0, // 未読数は後で実装
+            is_pinned: diaryMap.get(diary.id) || false,
           };
         })
       );
@@ -387,5 +391,21 @@ export class DiaryService {
    */
   static unsubscribeFromEntries(channel: any) {
     supabase.removeChannel(channel);
+  }
+
+  /**
+   * ピン留め状態を切り替え
+   */
+  static async togglePin(diaryId: string, userId: string, currentStatus: boolean): Promise<void> {
+    const { error } = await supabase
+      .from('diary_members')
+      .update({ is_pinned: !currentStatus })
+      .eq('diary_id', diaryId)
+      .eq('profile_id', userId);
+
+    if (error) {
+      console.error('Error toggling pin:', error);
+      throw error;
+    }
   }
 }
