@@ -1,5 +1,4 @@
 import { CalendarPickerModal } from '@/components/capsule/CalendarPickerModal';
-import { CapsuleTypeSelector } from '@/components/capsule/CapsuleTypeSelector';
 import { CreateConfirmModal } from '@/components/capsule/CreateConfirmModal';
 import { DatePickerModal } from '@/components/capsule/DatePickerModal';
 import { DateSelector } from '@/components/capsule/DateSelector';
@@ -7,6 +6,7 @@ import { FormInput } from '@/components/capsule/FormInput';
 import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { TypeSelector } from '@/components/ui/TypeSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
@@ -111,13 +111,8 @@ export default function CreateCapsuleScreen() {
       return false;
     }
 
-    if (capsuleType === CapsuleType.OneToOne && selectedFriends.length !== 1) {
-      Alert.alert('エラー', '1対1のカプセルには1人の友達を選択してください');
-      return false;
-    }
-
-    if (capsuleType === CapsuleType.Group && selectedFriends.length === 0) {
-      Alert.alert('エラー', 'グループカプセルには最低1人の友達を選択してください');
+    if (capsuleType === CapsuleType.WithFriends && selectedFriends.length === 0) {
+      Alert.alert('エラー', '友達を選択してください');
       return false;
     }
 
@@ -141,7 +136,7 @@ export default function CreateCapsuleScreen() {
         description: description.trim() || undefined,
         unlock_at: unlockDate.toISOString(),
         capsule_type: capsuleType,
-        member_ids: capsuleType !== 'personal' ? selectedFriends : undefined,
+        member_ids: capsuleType === CapsuleType.WithFriends ? selectedFriends : undefined,
       };
 
       const createdCapsule = await capsuleService.createCapsule(capsuleData, user.id);
@@ -185,13 +180,37 @@ export default function CreateCapsuleScreen() {
           />
 
           {/* カプセルタイプ */}
-          <CapsuleTypeSelector selectedType={capsuleType} onSelect={setCapsuleType} />
+          <TypeSelector
+            label="カプセルタイプ"
+            options={[
+              {
+                value: CapsuleType.Personal,
+                icon: 'person-outline',
+                title: '個人',
+                description: '自分だけのカプセル',
+              },
+              {
+                value: CapsuleType.WithFriends,
+                icon: 'people-outline',
+                title: '友達と',
+                description: '友達と共有',
+              },
+            ]}
+            selectedType={capsuleType}
+            onSelect={(type) => {
+              setCapsuleType(type);
+              if (type === CapsuleType.Personal) {
+                setSelectedFriends([]);
+              }
+            }}
+          />
 
           {/* 友達選択 */}
-          {capsuleType !== 'personal' && (
+          {capsuleType === CapsuleType.WithFriends && (
             <View className="mb-6">
               <Text className="text-sm font-semibold text-gray-700 mb-2">
-                友達を選択 <Text className="text-red-500">*</Text>
+                友達を選択 ({selectedFriends.length}人選択中){' '}
+                <Text className="text-red-500">*</Text>
               </Text>
               {friends.length === 0 ? (
                 <InfoBox type="warning" message="友達がいません。先に友達を追加してください。" />
@@ -199,19 +218,12 @@ export default function CreateCapsuleScreen() {
                 <View>
                   {friends.map((friend) => {
                     const isSelected = selectedFriends.includes(friend.profile.id);
-                    const maxSelection = capsuleType === CapsuleType.OneToOne ? 1 : undefined;
-                    const isDisabled = !!(
-                      maxSelection &&
-                      selectedFriends.length >= maxSelection &&
-                      !isSelected
-                    );
                     return (
                       <FriendSelectItem
                         key={friend.profile.id}
                         friend={friend}
                         isSelected={isSelected}
                         onToggle={toggleFriendSelection}
-                        disabled={isDisabled}
                       />
                     );
                   })}

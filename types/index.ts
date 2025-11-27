@@ -16,6 +16,7 @@ export interface Diary {
   id: string;
   title: string;
   is_group: boolean;
+  diary_type: DiaryType;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -82,8 +83,12 @@ export interface UserSearchResult {
 // Capsule Types - Enums for better type safety and readability
 export enum CapsuleType {
   Personal = 'personal',
-  OneToOne = 'one_to_one',
-  Group = 'group',
+  WithFriends = 'with_friends',
+}
+
+export enum DiaryType {
+  Personal = 'personal',
+  WithFriends = 'with_friends',
 }
 
 export enum CapsuleStatus {

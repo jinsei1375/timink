@@ -1,12 +1,13 @@
 import { supabase } from '@/lib/supabase';
 import { NotificationService } from '@/services/notificationService';
-import type { DiaryEntry, Profile } from '@/types';
+import { DiaryEntry, DiaryType, Profile } from '@/types';
 
 // 交換日記と最新エントリー、メンバー情報を含む型
 export interface DiaryWithDetails {
   id: string;
   title: string;
   is_group: boolean;
+  diary_type: DiaryType;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -15,7 +16,6 @@ export interface DiaryWithDetails {
   unread_count: number;
   is_pinned: boolean;
 }
-
 export class DiaryService {
   /**
    * 自分が参加している交換日記一覧を取得
@@ -88,7 +88,7 @@ export class DiaryService {
   /**
    * 新しい交換日記を作成
    */
-  static async createDiary(title: string, friendIds: string[]) {
+  static async createDiary(title: string, friendIds: string[], diaryType: DiaryType) {
     try {
       const {
         data: { user },
@@ -101,6 +101,7 @@ export class DiaryService {
         .insert({
           title,
           is_group: friendIds.length > 1,
+          diary_type: diaryType,
           created_by: user.id,
         })
         .select()

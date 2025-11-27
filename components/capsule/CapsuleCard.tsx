@@ -19,10 +19,8 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
     switch (capsule.capsule_type) {
       case CapsuleType.Personal:
         return '個人';
-      case CapsuleType.OneToOne:
-        return '1対1';
-      case CapsuleType.Group:
-        return 'グループ';
+      case CapsuleType.WithFriends:
+        return '友達と';
       default:
         return '';
     }

@@ -1,10 +1,12 @@
 import { EmptyState } from '@/components/diary/EmptyState';
 import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { TypeSelector } from '@/components/ui/TypeSelector';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
+
 import { FriendService } from '@/services/friendService';
-import { Friend } from '@/types';
+import { DiaryType, Friend } from '@/types';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -22,6 +24,7 @@ import {
 export default function CreateDiaryScreen() {
   const router = useRouter();
   const [title, setTitle] = useState('');
+  const [diaryType, setDiaryType] = useState<DiaryType>(DiaryType.Personal);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +40,7 @@ export default function CreateDiaryScreen() {
     useCallback(() => {
       return () => {
         setTitle('');
+        setDiaryType(DiaryType.Personal);
         setSelectedFriends([]);
       };
     }, [])
@@ -69,7 +73,7 @@ export default function CreateDiaryScreen() {
       return;
     }
 
-    if (selectedFriends.length === 0) {
+    if (diaryType === DiaryType.WithFriends && selectedFriends.length === 0) {
       Alert.alert('エラー', '少なくとも1人の友達を選択してください');
       return;
     }
@@ -77,7 +81,7 @@ export default function CreateDiaryScreen() {
     setIsCreating(true);
 
     try {
-      const result = await DiaryService.createDiary(title, selectedFriends);
+      const result = await DiaryService.createDiary(title, selectedFriends, diaryType);
 
       if (result.success) {
         Alert.alert('作成完了', '交換日記を作成しました', [
@@ -155,33 +159,66 @@ export default function CreateDiaryScreen() {
             <Text className="text-xs text-gray-400 mt-1 text-right">{title.length}/50</Text>
           </View>
 
-          {/* 友達選択 */}
-          <View className="flex-1">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              メンバーを選択 ({selectedFriends.length}人選択中)
-            </Text>
+          <TypeSelector
+            label="日記タイプ"
+            options={[
+              {
+                value: DiaryType.Personal,
+                icon: 'person-outline',
+                title: '個人',
+                description: '自分だけの日記',
+              },
+              {
+                value: DiaryType.WithFriends,
+                icon: 'people-outline',
+                title: '友達と',
+                description: '友達と交換日記',
+              },
+            ]}
+            selectedType={diaryType}
+            onSelect={(type) => {
+              setDiaryType(type);
+              if (type === DiaryType.Personal) {
+                setSelectedFriends([]);
+              }
+            }}
+          />
 
-            {friends.length === 0 ? (
-              renderEmptyState()
-            ) : (
-              <FlatList
-                data={friends}
-                renderItem={renderFriendItem}
-                keyExtractor={keyExtractor}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 20 }}
-              />
-            )}
-          </View>
+          {/* 友達選択 */}
+          {diaryType === DiaryType.WithFriends && (
+            <View className="flex-1">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                友達を選択 ({selectedFriends.length}人選択中)
+              </Text>
+
+              {friends.length === 0 ? (
+                renderEmptyState()
+              ) : (
+                <FlatList
+                  data={friends}
+                  renderItem={renderFriendItem}
+                  keyExtractor={keyExtractor}
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 20 }}
+                />
+              )}
+            </View>
+          )}
         </View>
 
         {/* 作成ボタン */}
         <View className="p-4 border-t border-gray-100 bg-gray-50">
           <Pressable
             onPress={handleCreate}
-            disabled={isCreating || !title.trim() || selectedFriends.length === 0}
+            disabled={
+              isCreating ||
+              !title.trim() ||
+              (diaryType === DiaryType.WithFriends && selectedFriends.length === 0)
+            }
             className={`w-full py-4 rounded-xl flex-row items-center justify-center ${
-              isCreating || !title.trim() || selectedFriends.length === 0
+              isCreating ||
+              !title.trim() ||
+              (diaryType === DiaryType.WithFriends && selectedFriends.length === 0)
                 ? 'bg-gray-300'
                 : 'bg-app-primary'
             }`}
