@@ -3,6 +3,7 @@ import { capsuleService } from '@/services/capsuleService';
 
 import { CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Pressable, Text, View } from 'react-native';
 
 interface CapsuleCardProps {
@@ -42,14 +43,19 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
       parts.push(`${timeRemaining.minutes}分`);
     }
 
-    return parts.join(' ') + '後に開封';
+    return parts.join(' ') + '後に開封可能';
   };
 
   return (
     <Pressable
       onPress={onPress}
-      onLongPress={onLongPress}
-      className="bg-white rounded-2xl p-4 mb-4 border border-gray-200 active:opacity-70"
+      onLongPress={() => {
+        if (onLongPress) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          onLongPress();
+        }
+      }}
+      className="bg-white mb-4 rounded-2xl p-4 shadow-sm border border-gray-200 active:opacity-70"
     >
       {/* ヘッダー */}
       <View className="flex-row items-center justify-between mb-3">
@@ -89,7 +95,7 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
                 ? 'text-gray-500'
                 : timeRemaining.isUnlockable
                   ? 'text-green-600'
-                  : 'text-gray-700'
+                  : 'text-gray-500'
             }`}
           >
             {getTimeRemainingText()}
@@ -97,7 +103,7 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
         </View>
 
         {/* メンバー数 */}
-        {capsule.members && capsule.members.length > 1 && (
+        {capsule.members && capsule.members.length > 0 && (
           <View className="flex-row items-center gap-1">
             <Ionicons name="people-outline" size={16} color="#6B7280" />
             <Text className="text-sm text-gray-600">{capsule.members.length}人</Text>

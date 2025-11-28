@@ -1,10 +1,12 @@
 import { PinBadge } from '@/components/ui/PinBadge';
 import { DiaryWithDetails } from '@/services/diaryService';
+import { DiaryType } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 
 import React, { useCallback } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { DiaryEntryPreview } from './DiaryEntryPreview';
-import { MemberAvatarGroup } from './MemberAvatarGroup';
 
 interface DiaryCardProps {
   diary: DiaryWithDetails;
@@ -19,65 +21,81 @@ interface DiaryCardProps {
  */
 export const DiaryCard = React.memo<DiaryCardProps>(
   ({ diary, currentUserId, onPress, onLongPress, formatDate }) => {
-    const otherMembers = diary.members.filter((m) => m.id !== currentUserId);
-    const memberNames = otherMembers.map((m) => m.display_name || '名前なし').join(', ');
-
     const handlePress = useCallback(() => {
       onPress(diary.id);
     }, [diary.id, onPress]);
 
     const handleLongPress = useCallback(() => {
       if (onLongPress) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
         onLongPress(diary.id);
       }
     }, [diary.id, onLongPress]);
 
+    const getDiaryTypeLabel = () => {
+      return diary.diary_type === DiaryType.Personal ? '個人' : '友達と';
+    };
+
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={handlePress}
         onLongPress={handleLongPress}
-        className="bg-white mb-3 rounded-2xl p-4 shadow-sm border border-gray-100"
-        activeOpacity={0.7}
+        className="bg-white mb-4 rounded-2xl p-4 shadow-sm border border-gray-200 active:opacity-70"
       >
-        {/* ヘッダー部分 */}
+        {/* ヘッダー */}
         <View className="flex-row items-center justify-between mb-3">
-          <View className="flex-row items-center flex-1">
-            {/* メンバーのアバター */}
-            <View className="mr-3">
-              <MemberAvatarGroup members={otherMembers} maxDisplay={3} size="medium" />
-            </View>
-
-            {/* タイトル */}
-            <View className="flex-1">
-              <View className="flex-row items-center">
-                {diary.is_pinned && <PinBadge className="mr-1.5" size={12} />}
-                <Text className="text-base font-bold text-gray-800 flex-1" numberOfLines={1}>
-                  {diary.title}
-                </Text>
-              </View>
-              <Text className="text-xs text-gray-500 mt-0.5" numberOfLines={1}>
-                {memberNames}
-              </Text>
-            </View>
+          <View className="flex-row items-center gap-2">
+            {diary.is_pinned && <PinBadge className="mr-1.5" size={12} />}
+            <Ionicons name="book-outline" size={20} color="#4B5563" />
+            <Text className="text-xs font-medium text-gray-500">{getDiaryTypeLabel()}</Text>
           </View>
-
-          {/* 未読バッジ */}
           {diary.unread_count > 0 && (
-            <View className="bg-red-500 rounded-full w-6 h-6 items-center justify-center ml-2">
-              <Text className="text-white text-xs font-bold">{diary.unread_count}</Text>
+            <View className="bg-red-500 px-2 py-1 rounded-full">
+              <Text className="text-white text-xs font-medium">{diary.unread_count}件</Text>
             </View>
           )}
         </View>
 
+        {/* タイトル */}
+        <Text className="text-lg font-bold text-gray-900 mb-2">{diary.title}</Text>
+
         {/* 最新エントリー */}
         {diary.latest_entry ? (
-          <DiaryEntryPreview entry={diary.latest_entry} formatDate={formatDate} />
-        ) : (
-          <View className="bg-gray-50 rounded-lg p-3">
-            <Text className="text-sm text-gray-400 text-center">まだ投稿がありません</Text>
+          <View className="mb-3">
+            <DiaryEntryPreview entry={diary.latest_entry} formatDate={formatDate} />
           </View>
+        ) : (
+          <Text className="text-sm text-gray-400 mb-3">まだ投稿がありません</Text>
         )}
-      </TouchableOpacity>
+
+        {/* ステータス */}
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-1">
+            <Ionicons name="time-outline" size={16} color="#6B7280" />
+            <Text className="text-sm text-gray-600">{formatDate(diary.updated_at)}</Text>
+          </View>
+
+          {/* メンバー数 */}
+          {diary.members && diary.members.length > 0 && (
+            <View className="flex-row items-center gap-1">
+              <Ionicons name="people-outline" size={16} color="#6B7280" />
+              <Text className="text-sm text-gray-600">{diary.members.length}人</Text>
+            </View>
+          )}
+        </View>
+
+        {/* 最終更新日 */}
+        <View className="mt-3 pt-3 border-t border-gray-100">
+          <Text className="text-xs text-gray-500">
+            最終更新:{' '}
+            {new Date(diary.updated_at).toLocaleDateString('ja-JP', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </Text>
+        </View>
+      </Pressable>
     );
   }
 );
