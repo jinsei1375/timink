@@ -7,7 +7,6 @@ import * as Haptics from 'expo-haptics';
 
 import React, { useCallback, useState } from 'react';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
-import { DiaryEntryPreview } from './DiaryEntryPreview';
 
 interface DiaryCardProps {
   diary: DiaryWithDetails;
@@ -61,15 +60,6 @@ export const DiaryCard = React.memo<DiaryCardProps>(
 
         {/* タイトル */}
         <Text className="text-lg font-bold text-gray-900 mb-2">{diary.title}</Text>
-
-        {/* 最新エントリー */}
-        {diary.latest_entry ? (
-          <View className="mb-3">
-            <DiaryEntryPreview entry={diary.latest_entry} formatDate={formatDate} />
-          </View>
-        ) : (
-          <Text className="text-sm text-gray-400 mb-3">まだ投稿がありません</Text>
-        )}
 
         {/* ステータス */}
         <View className="flex-row items-center justify-between">

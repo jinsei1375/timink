@@ -27,58 +27,39 @@ export class DiaryService {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('認証が必要です');
 
-      // 自分が参加している日記のIDを取得
-      const { data: memberships, error: membershipError } = await supabase
+      // 1. 自分の参加情報(diary_members)を起点に、日記情報(diaries)とメンバー(members)を一括取得
+      // これによりクエリ回数を大幅に削減
+      const { data: memberships, error } = await supabase
         .from('diary_members')
-        .select('diary_id, is_pinned')
-        .eq('profile_id', user.id);
+        .select(
+          `
+          is_pinned,
+          diary:diaries!inner(
+            *,
+            members:diary_members(
+              profile:profiles(*)
+            )
+          )
+        `
+        )
+        .eq('profile_id', user.id)
+        .order('updated_at', { foreignTable: 'diary', ascending: false });
 
-      if (membershipError) throw membershipError;
+      if (error) throw error;
 
       if (!memberships || memberships.length === 0) return [];
 
-      const diaryMap = new Map(memberships.map((m) => [m.diary_id, m.is_pinned]));
-      const diaryIds = memberships.map((m) => m.diary_id);
-
-      // 日記情報を取得
-      const { data: diaries, error: diariesError } = await supabase
-        .from('diaries')
-        .select('*')
-        .in('id', diaryIds)
-        .order('updated_at', { ascending: false });
-
-      if (diariesError) throw diariesError;
-      if (!diaries) return [];
-
-      // 各日記のメンバーと最新エントリーを取得
-      const diariesWithDetails = await Promise.all(
-        diaries.map(async (diary) => {
-          // メンバー情報取得
-          const { data: members } = await supabase
-            .from('diary_members')
-            .select('profile:profiles(*)')
-            .eq('diary_id', diary.id);
-
-          // 最新エントリー取得
-          const { data: latestEntry } = await supabase
-            .from('diary_entries')
-            .select('*, author:profiles(*)')
-            .eq('diary_id', diary.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          return {
-            ...diary,
-            members: members?.map((m: any) => m.profile) || [],
-            latest_entry: latestEntry || undefined,
-            unread_count: 0, // 未読数は後で実装
-            is_pinned: diaryMap.get(diary.id) || false,
-          };
-        })
-      );
-
-      return diariesWithDetails;
+      // 2. データを整形して返す
+      return memberships.map((m: any) => {
+        const diary = m.diary;
+        return {
+          ...diary,
+          members: diary.members.map((mem: any) => mem.profile),
+          is_pinned: m.is_pinned,
+          unread_count: 0,
+          latest_entry: undefined,
+        };
+      });
     } catch (error) {
       console.error('❌ 交換日記一覧取得エラー:', error);
       return [];
@@ -132,34 +113,37 @@ export class DiaryService {
    */
   static async getDiaryDetail(diaryId: string) {
     try {
+      // 日記、メンバー、エントリーを一括取得
       const { data: diary, error: diaryError } = await supabase
         .from('diaries')
-        .select('*')
+        .select(
+          `
+          *,
+          members:diary_members(
+            profile:profiles(*)
+          ),
+          entries:diary_entries(
+            *,
+            author:profiles(*)
+          )
+        `
+        )
         .eq('id', diaryId)
+        .order('posted_date', { foreignTable: 'entries', ascending: false })
         .single();
 
       if (diaryError) throw diaryError;
 
-      // メンバー取得
-      const { data: members } = await supabase
-        .from('diary_members')
-        .select('profile:profiles(*)')
-        .eq('diary_id', diaryId);
-
-      // エントリー一覧取得
-      const { data: entries } = await supabase
-        .from('diary_entries')
-        .select('*, author:profiles(*)')
-        .eq('diary_id', diaryId)
-        .order('posted_date', { ascending: false });
+      // 整形して返す
+      const formattedDiary = {
+        ...diary,
+        members: diary.members.map((m: any) => m.profile),
+        entries: diary.entries || [],
+      };
 
       return {
         success: true,
-        data: {
-          ...diary,
-          members: members?.map((m: any) => m.profile) || [],
-          entries: entries || [],
-        },
+        data: formattedDiary,
         error: null,
       };
     } catch (error: any) {
