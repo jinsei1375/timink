@@ -14,34 +14,53 @@ class CapsuleService {
    * ユーザーのタイムカプセル一覧を取得
    */
   async getUserCapsules(userId: string): Promise<CapsuleWithMembers[]> {
-    const { data, error } = await supabase
+    // 1. まず自分が参加しているカプセルのIDとピン留め状態を取得
+    const { data: myMemberships, error: membershipError } = await supabase
+      .from('capsule_members')
+      .select('capsule_id, is_pinned')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    if (membershipError) {
+      console.error('Error fetching user memberships:', membershipError);
+      throw membershipError;
+    }
+
+    if (!myMemberships || myMemberships.length === 0) {
+      return [];
+    }
+
+    const capsuleIds = myMemberships.map((m) => m.capsule_id);
+    const pinnedMap = new Map(myMemberships.map((m) => [m.capsule_id, m.is_pinned]));
+
+    // 2. カプセル本体の情報を取得
+    const { data: capsules, error: capsulesError } = await supabase
       .from('capsules')
-      .select(
-        `
-        *,
-        members:capsule_members!inner(
-          id,
-          user_id,
-          role,
-          status,
-          joined_at,
-          is_pinned
-        )
-      `
-      )
-      .eq('members.user_id', userId)
-      .eq('members.status', 'active')
+      .select('*')
+      .in('id', capsuleIds)
       .neq('status', 'deleted')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching user capsules:', error);
-      throw error;
+    if (capsulesError) {
+      console.error('Error fetching capsules:', capsulesError);
+      throw capsulesError;
     }
 
-    // creatorプロフィールとコンテンツ数を取得
-    const capsulesWithCount = await Promise.all(
-      (data || []).map(async (capsule) => {
+    // 3. 各カプセルの詳細情報（全メンバー、作成者、コンテンツ数）を取得
+    const capsulesWithDetails = await Promise.all(
+      (capsules || []).map(async (capsule) => {
+        // 全メンバーとプロフィールを取得
+        const { data: members } = await supabase
+          .from('capsule_members')
+          .select(
+            `
+            *,
+            profile:profiles(*)
+          `
+          )
+          .eq('capsule_id', capsule.id)
+          .eq('status', 'active');
+
         // creatorのプロフィールを取得
         const { data: creatorProfile } = await supabase
           .from('profiles')
@@ -55,19 +74,17 @@ class CapsuleService {
           .select('*', { count: 'exact', head: true })
           .eq('capsule_id', capsule.id);
 
-        // 自分のメンバー情報を取得（is_pinnedのため）
-        const myMemberInfo = capsule.members.find((m: any) => m.user_id === userId);
-
         return {
           ...capsule,
+          members: members || [],
           creator: creatorProfile || undefined,
           contents_count: count || 0,
-          is_pinned: myMemberInfo?.is_pinned || false,
+          is_pinned: pinnedMap.get(capsule.id) || false,
         };
       })
     );
 
-    return capsulesWithCount;
+    return capsulesWithDetails;
   }
 
   /**

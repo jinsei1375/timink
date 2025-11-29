@@ -1,11 +1,12 @@
+import { MemberListModal } from '@/components/ui/MemberListModal';
 import { PinBadge } from '@/components/ui/PinBadge';
 import { DiaryWithDetails } from '@/services/diaryService';
 import { DiaryType } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 
-import React, { useCallback } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { DiaryEntryPreview } from './DiaryEntryPreview';
 
 interface DiaryCardProps {
@@ -21,6 +22,8 @@ interface DiaryCardProps {
  */
 export const DiaryCard = React.memo<DiaryCardProps>(
   ({ diary, currentUserId, onPress, onLongPress, formatDate }) => {
+    const [showMembers, setShowMembers] = useState(false);
+
     const handlePress = useCallback(() => {
       onPress(diary.id);
     }, [diary.id, onPress]);
@@ -77,10 +80,13 @@ export const DiaryCard = React.memo<DiaryCardProps>(
 
           {/* メンバー数 */}
           {diary.members && diary.members.length > 0 && (
-            <View className="flex-row items-center gap-1">
+            <TouchableOpacity
+              className="flex-row items-center gap-1"
+              onPress={() => setShowMembers(true)}
+            >
               <Ionicons name="people-outline" size={16} color="#6B7280" />
               <Text className="text-sm text-gray-600">{diary.members.length}人</Text>
-            </View>
+            </TouchableOpacity>
           )}
         </View>
 
@@ -95,6 +101,13 @@ export const DiaryCard = React.memo<DiaryCardProps>(
             })}
           </Text>
         </View>
+
+        <MemberListModal
+          visible={showMembers}
+          onClose={() => setShowMembers(false)}
+          members={diary.members}
+          title="交換日記メンバー"
+        />
       </Pressable>
     );
   }

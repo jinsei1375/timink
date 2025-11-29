@@ -1,10 +1,12 @@
+import { MemberListModal } from '@/components/ui/MemberListModal';
 import { PinBadge } from '@/components/ui/PinBadge';
 import { capsuleService } from '@/services/capsuleService';
 
 import { CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { Pressable, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 
 interface CapsuleCardProps {
   capsule: CapsuleWithMembers;
@@ -13,6 +15,7 @@ interface CapsuleCardProps {
 }
 
 export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps) {
+  const [showMembers, setShowMembers] = useState(false);
   const timeRemaining = capsuleService.getTimeUntilUnlock(capsule.unlock_at);
   const isLocked = capsule.status === CapsuleStatus.Locked;
 
@@ -104,10 +107,13 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
 
         {/* メンバー数 */}
         {capsule.members && capsule.members.length > 0 && (
-          <View className="flex-row items-center gap-1">
+          <TouchableOpacity
+            className="flex-row items-center gap-1"
+            onPress={() => setShowMembers(true)}
+          >
             <Ionicons name="people-outline" size={16} color="#6B7280" />
             <Text className="text-sm text-gray-600">{capsule.members.length}人</Text>
-          </View>
+          </TouchableOpacity>
         )}
       </View>
 
@@ -122,6 +128,13 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
           })}
         </Text>
       </View>
+
+      <MemberListModal
+        visible={showMembers}
+        onClose={() => setShowMembers(false)}
+        members={capsule.members?.map((m) => m.profile!).filter(Boolean) || []}
+        title="カプセルメンバー"
+      />
     </Pressable>
   );
 }

@@ -150,7 +150,14 @@ export default function HomeScreen() {
                   </TouchableOpacity>
                 </View>
               ) : (
-                friends.map((friend) => <FriendSelectItem key={friend.id} friend={friend} />)
+                friends.map((friend) => (
+                  <FriendSelectItem
+                    key={friend.id}
+                    friend={friend}
+                    isSelected={false}
+                    onToggle={() => {}}
+                  />
+                ))
               )}
             </View>
           </>

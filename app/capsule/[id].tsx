@@ -138,9 +138,9 @@ export default function CapsuleDetailScreen() {
               <Text className="text-gray-600 text-sm">
                 {capsule.capsule_type === CapsuleType.Personal
                   ? '個人'
-                  : capsule.capsule_type === CapsuleType.OneToOne
-                    ? '1対1'
-                    : 'グループ'}
+                  : capsule.capsule_type === CapsuleType.WithFriends
+                    ? '友達と'
+                    : ''}
               </Text>
             </View>
           </View>
@@ -240,7 +240,7 @@ export default function CapsuleDetailScreen() {
           {/* 開封後のコンテンツ一覧 */}
           {isUnlocked && contents.length > 0 && (
             <View className="mb-6">
-              <Text className="text-gray-700 font-semibold text-base mb-3">みんなの想い出</Text>
+              <Text className="text-gray-700 font-semibold text-base mb-3">みんなのコンテンツ</Text>
               {contents.map((content) =>
                 content.author ? (
                   <View
