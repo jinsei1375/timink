@@ -6,7 +6,6 @@ import { Text, View } from 'react-native';
 
 interface MemberAvatarGroupProps {
   members: Profile[];
-  maxDisplay?: number;
   size?: 'small' | 'medium' | 'large';
 }
 
@@ -20,10 +19,8 @@ const SIZE_CONFIG = {
  * メンバーのアバターをグループ表示するコンポーネント
  */
 export const MemberAvatarGroup = React.memo<MemberAvatarGroupProps>(
-  ({ members, maxDisplay = 3, size = 'medium' }) => {
+  ({ members, size = 'medium' }) => {
     const config = SIZE_CONFIG[size];
-    const displayMembers = members.slice(0, maxDisplay);
-    const remainingCount = members.length - maxDisplay;
 
     if (members.length === 0) {
       return (
@@ -37,28 +34,15 @@ export const MemberAvatarGroup = React.memo<MemberAvatarGroupProps>(
     }
 
     return (
-      <View className={`flex-row ${config.spacing}`}>
-        {displayMembers.map((member, index) => (
-          <View
-            key={member.id}
-            style={{ zIndex: 10 - index }}
-            className="border-2 border-white rounded-full"
-          >
+      <View className="flex-row flex-wrap gap-1">
+        {members.map((member) => (
+          <View key={member.id} className="items-center w-16">
             <Avatar uri={member.avatar_url} size={config.size} />
+            <Text className="text-[8px] text-gray-600 mt-1 text-center" numberOfLines={1}>
+              {member.display_name || '未設定'}
+            </Text>
           </View>
         ))}
-        {remainingCount > 0 && (
-          <View
-            style={{
-              width: config.size,
-              height: config.size,
-              zIndex: 0,
-            }}
-            className="rounded-full bg-gray-300 items-center justify-center border-2 border-white"
-          >
-            <Text className="text-gray-600 font-bold text-sm">+{remainingCount}</Text>
-          </View>
-        )}
       </View>
     );
   }
