@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
@@ -45,9 +46,17 @@ export class NotificationService {
       }
 
       // Expo Push Tokenを取得
+      const projectId =
+        Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+
+      if (!projectId) {
+        console.error('Project IDが見つかりません');
+        return null;
+      }
+
       token = (
         await Notifications.getExpoPushTokenAsync({
-          projectId: '870b6d3d-c4e5-4978-9e13-0b082eabae7e',
+          projectId,
         })
       ).data;
 
@@ -123,23 +132,5 @@ export class NotificationService {
       console.error('通知送信エラー:', error);
       // エラーが発生しても投稿処理は続行
     }
-  }
-
-  /**
-   * 通知リスナーを設定
-   */
-  static addNotificationReceivedListener(
-    callback: (notification: Notifications.Notification) => void
-  ) {
-    return Notifications.addNotificationReceivedListener(callback);
-  }
-
-  /**
-   * 通知タップリスナーを設定
-   */
-  static addNotificationResponseReceivedListener(
-    callback: (response: Notifications.NotificationResponse) => void
-  ) {
-    return Notifications.addNotificationResponseReceivedListener(callback);
   }
 }

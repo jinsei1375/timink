@@ -1,9 +1,10 @@
 import '@/assets/css/global.css';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useNotificationObserver } from '@/hooks/useNotificationObserver';
 import { supabase } from '@/lib/supabase';
 import * as QueryParams from 'expo-auth-session/build/QueryParams';
 import * as Linking from 'expo-linking';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,6 +36,10 @@ export default function RootLayout() {
 
 function RootLayoutContent() {
   const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // 通知の監視
+  useNotificationObserver();
 
   // Deep linkの処理
   useEffect(() => {
