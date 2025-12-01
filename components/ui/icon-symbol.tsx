@@ -20,6 +20,8 @@ const MAPPING = {
   'person.fill': 'person',
   'person.badge.plus': 'person-add',
   'person.2': 'people',
+  'person.2.fill': 'people',
+  'bell.fill': 'notifications',
   globe: 'public',
   google: 'login',
 } as const;
