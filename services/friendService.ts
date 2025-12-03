@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { Friend, FriendRequest, UserSearchResult } from '@/types';
+import { Friend, FriendRequest, FriendshipStatus, UserSearchResult } from '@/types';
 
 export class FriendService {
   /**
@@ -36,8 +36,8 @@ export class FriendService {
         user_id: profile.user_id,
         display_name: profile.display_name,
         avatar_url: profile.avatar_url,
-        is_friend: friendship?.status === 'accepted',
-        friendship_status: friendship?.status || 'none',
+        is_friend: friendship?.status === FriendshipStatus.Accepted,
+        friendship_status: (friendship?.status as FriendshipStatus) || FriendshipStatus.None,
       };
     } catch (error) {
       console.error('❌ ユーザー検索エラー:', error);
@@ -58,7 +58,7 @@ export class FriendService {
       const { error } = await supabase.from('friendships').insert({
         requester_id: user.id,
         addressee_id: addresseeId,
-        status: 'pending',
+        status: FriendshipStatus.Pending,
       });
 
       if (error) throw error;
@@ -76,7 +76,7 @@ export class FriendService {
     try {
       const { error } = await supabase
         .from('friendships')
-        .update({ status: 'accepted', updated_at: new Date().toISOString() })
+        .update({ status: FriendshipStatus.Accepted, updated_at: new Date().toISOString() })
         .eq('id', friendshipId);
 
       if (error) throw error;
@@ -94,7 +94,7 @@ export class FriendService {
     try {
       const { error } = await supabase
         .from('friendships')
-        .update({ status: 'rejected', updated_at: new Date().toISOString() })
+        .update({ status: FriendshipStatus.Rejected, updated_at: new Date().toISOString() })
         .eq('id', friendshipId);
 
       if (error) throw error;
@@ -126,7 +126,7 @@ export class FriendService {
         `
         )
         .eq('addressee_id', user.id)
-        .eq('status', 'pending');
+        .eq('status', FriendshipStatus.Pending);
 
       if (error) throw error;
 
@@ -166,7 +166,7 @@ export class FriendService {
           addressee:profiles!addressee_id(*)
         `
         )
-        .eq('status', 'accepted')
+        .eq('status', FriendshipStatus.Accepted)
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
       if (error) throw error;

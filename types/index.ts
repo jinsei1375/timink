@@ -1,6 +1,56 @@
 import { User } from '@supabase/supabase-js';
 
-// Profile Types
+// Types
+export enum CapsuleType {
+  Personal = 'personal',
+  WithFriends = 'with_friends',
+}
+
+export enum DiaryType {
+  Personal = 'personal',
+  WithFriends = 'with_friends',
+}
+
+export enum CapsuleStatus {
+  Locked = 'locked',
+  Unlocked = 'unlocked',
+  Deleted = 'deleted',
+}
+
+export enum MemberRole {
+  Owner = 'owner',
+  Member = 'member',
+}
+
+export enum MemberStatus {
+  Active = 'active',
+  Left = 'left',
+  Removed = 'removed',
+}
+
+export enum ContentType {
+  Text = 'text',
+  Image = 'image',
+  Video = 'video',
+  Audio = 'audio',
+}
+
+export enum FriendshipStatus {
+  Pending = 'pending',
+  Accepted = 'accepted',
+  Rejected = 'rejected',
+  Blocked = 'blocked',
+  None = 'none',
+}
+
+export enum ActivityType {
+  CapsuleUnlockable = 'capsule_unlockable', // 開封可能
+  CapsulePending = 'capsule_pending', // まだ投稿していない
+  DiaryAvailable = 'diary_available', // 今日投稿可能
+  DiaryMemory = 'diary_memory', // 過去の振り返り
+  FriendRequest = 'friend_request', // 友達申請
+}
+
 export interface Profile {
   id: string;
   user_id: string;
@@ -49,7 +99,7 @@ export interface Friendship {
   id: string;
   requester_id: string;
   addressee_id: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'blocked';
+  status: FriendshipStatus;
   created_at: string;
   updated_at: string;
 }
@@ -58,7 +108,7 @@ export interface Friendship {
 export interface FriendRequest {
   id: string;
   requester: Profile;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: FriendshipStatus;
   created_at: string;
 }
 
@@ -77,42 +127,7 @@ export interface UserSearchResult {
   display_name: string | null;
   avatar_url: string | null;
   is_friend: boolean;
-  friendship_status?: 'pending' | 'accepted' | 'none';
-}
-
-// Capsule Types - Enums for better type safety and readability
-export enum CapsuleType {
-  Personal = 'personal',
-  WithFriends = 'with_friends',
-}
-
-export enum DiaryType {
-  Personal = 'personal',
-  WithFriends = 'with_friends',
-}
-
-export enum CapsuleStatus {
-  Locked = 'locked',
-  Unlocked = 'unlocked',
-  Deleted = 'deleted',
-}
-
-export enum MemberRole {
-  Owner = 'owner',
-  Member = 'member',
-}
-
-export enum MemberStatus {
-  Active = 'active',
-  Left = 'left',
-  Removed = 'removed',
-}
-
-export enum ContentType {
-  Text = 'text',
-  Image = 'image',
-  Video = 'video',
-  Audio = 'audio',
+  friendship_status?: FriendshipStatus;
 }
 
 export interface Capsule {
@@ -268,7 +283,7 @@ export interface Database {
           id?: string;
           requester_id: string;
           addressee_id: string;
-          status?: 'pending' | 'accepted' | 'rejected' | 'blocked';
+          status?: FriendshipStatus;
           created_at?: string;
           updated_at?: string;
         };
@@ -276,7 +291,7 @@ export interface Database {
           id?: string;
           requester_id?: string;
           addressee_id?: string;
-          status?: 'pending' | 'accepted' | 'rejected' | 'blocked';
+          status?: FriendshipStatus;
           created_at?: string;
           updated_at?: string;
         };
@@ -302,4 +317,27 @@ export interface SignUpData {
 export interface SignInData {
   email: string;
   password: string;
+}
+
+// Activity Types (Home Feed)
+export interface Activity {
+  id: string;
+  type: ActivityType;
+  title: string;
+  description: string;
+  timestamp: string;
+  badge?: string;
+  badgeColor?: string;
+  icon: string;
+  actionable: boolean;
+  data: {
+    diaryId?: string;
+    capsuleId?: string;
+    friendRequestId?: string;
+  };
+}
+
+export interface ActivitySection {
+  title: string;
+  activities: Activity[];
 }

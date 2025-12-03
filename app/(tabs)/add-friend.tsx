@@ -3,7 +3,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { FriendService } from '@/services/friendService';
-import { UserSearchResult } from '@/types';
+import { FriendshipStatus, UserSearchResult } from '@/types';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -84,7 +84,7 @@ export default function AddFriendScreen() {
       return <InfoBox type="info" message="すでに友達です" icon="checkmark-circle" />;
     }
 
-    if (searchResult.friendship_status === 'pending') {
+    if (searchResult.friendship_status === FriendshipStatus.Pending) {
       return <InfoBox type="warning" message="リクエスト送信済み" icon="time-outline" />;
     }
 
@@ -92,7 +92,9 @@ export default function AddFriendScreen() {
   };
 
   const canSendRequest =
-    searchResult && !searchResult.is_friend && searchResult.friendship_status !== 'pending';
+    searchResult &&
+    !searchResult.is_friend &&
+    searchResult.friendship_status !== FriendshipStatus.Pending;
 
   return (
     <View className="flex-1 bg-white">
