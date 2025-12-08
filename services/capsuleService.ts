@@ -1,13 +1,16 @@
 import { supabase } from '@/lib/supabase';
-import type {
+import {
   Capsule,
   CapsuleContent,
   CapsuleContentWithAuthor,
+  CapsuleStatus,
   CapsuleWithMembers,
+  ContentType,
   CreateCapsuleData,
+  MemberRole,
+  MemberStatus,
   UpdateCapsuleContentData,
 } from '@/types';
-import { CapsuleStatus, ContentType, MemberRole, MemberStatus } from '@/types';
 
 class CapsuleService {
   /**
@@ -396,6 +399,106 @@ class CapsuleService {
     }
 
     return created;
+  }
+
+  /**
+   * 自分が投稿可能なカプセル（まだ投稿していない）を取得
+   */
+  async getPendingCapsules(userId: string): Promise<CapsuleWithMembers[]> {
+    try {
+      const { data, error } = await supabase
+        .from('capsule_members')
+        .select(
+          `
+          is_pinned,
+          capsule:capsules!inner(
+            *,
+            creator:profiles!created_by(*),
+            members:capsule_members(
+              user_id,
+              profile:profiles(*)
+            ),
+            capsule_contents(id, created_by)
+          )
+        `
+        )
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .eq('capsule.status', 'locked') // 開封前のみ
+        .order('created_at', { foreignTable: 'capsule', ascending: false });
+
+      if (error) throw error;
+
+      // 自分がまだ投稿していないカプセルをフィルタリング
+      const pendingCapsules = data
+        .map((m: any) => {
+          const capsule = m.capsule;
+          const userHasPosted = capsule.capsule_contents?.some(
+            (content: any) => content.created_by === userId
+          );
+
+          if (userHasPosted) return null;
+
+          return {
+            ...capsule,
+            is_pinned: m.is_pinned,
+            members: capsule.members || [],
+            creator: Array.isArray(capsule.creator) ? capsule.creator[0] : capsule.creator,
+            contents_count: capsule.capsule_contents?.length || 0,
+          };
+        })
+        .filter(Boolean) as CapsuleWithMembers[];
+
+      return pendingCapsules;
+    } catch (error) {
+      console.error('Error fetching pending capsules:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 開封可能なカプセルを取得
+   */
+  async getUnlockableCapsules(userId: string): Promise<CapsuleWithMembers[]> {
+    try {
+      const { data, error } = await supabase
+        .from('capsule_members')
+        .select(
+          `
+          is_pinned,
+          capsule:capsules!inner(
+            *,
+            creator:profiles!created_by(*),
+            members:capsule_members(
+              user_id,
+              profile:profiles(*)
+            ),
+            capsule_contents(id)
+          )
+        `
+        )
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .eq('capsule.status', 'locked')
+        .lte('capsule.unlock_at', new Date().toISOString())
+        .order('unlock_at', { foreignTable: 'capsule', ascending: true });
+
+      if (error) throw error;
+
+      return (data || []).map((m: any) => {
+        const capsule = m.capsule;
+        return {
+          ...capsule,
+          is_pinned: m.is_pinned,
+          members: capsule.members || [],
+          creator: Array.isArray(capsule.creator) ? capsule.creator[0] : capsule.creator,
+          contents_count: capsule.capsule_contents?.length || 0,
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching unlockable capsules:', error);
+      throw error;
+    }
   }
 
   /**
