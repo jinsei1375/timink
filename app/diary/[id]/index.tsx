@@ -2,6 +2,7 @@ import { DiaryPageView } from '@/components/diary/DiaryPageView';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
 import { DiaryEntry, Profile } from '@/types';
@@ -36,6 +37,7 @@ export default function DiaryDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
+  const { subscribe } = useRefresh();
   const flatListRef = useRef<FlatList<DiaryEntry & { author: Profile }>>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -51,7 +53,7 @@ export default function DiaryDetailScreen() {
     params: { screen: 'diaries' },
   });
 
-  const loadDiaryData = async () => {
+  const loadDiaryData = useCallback(async () => {
     if (!id) return;
 
     try {
@@ -82,11 +84,19 @@ export default function DiaryDetailScreen() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     loadDiaryData();
-  }, [id]);
+  }, [loadDiaryData]);
+
+  // 日記更新イベントを購読
+  useEffect(() => {
+    const unsubscribe = subscribe(RefreshEvent.DIARY_UPDATED, loadDiaryData);
+    return () => {
+      unsubscribe();
+    };
+  }, [subscribe, loadDiaryData]);
 
   // リアルタイム更新を設定
   useEffect(() => {

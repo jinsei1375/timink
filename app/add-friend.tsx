@@ -1,7 +1,7 @@
 import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
-import { useHandleBack } from '@/hooks/useHandleBack';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { FriendService } from '@/services/friendService';
 import { FriendshipStatus, UserSearchResult } from '@/types';
 import { useRouter } from 'expo-router';
@@ -11,15 +11,15 @@ import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } fro
 export default function AddFriendScreen() {
   const router = useRouter();
   const { profile } = useAuth();
+  const { emit } = useRefresh();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<UserSearchResult | null>(null);
   const [isSendingRequest, setIsSendingRequest] = useState(false);
 
-  const handleBack = useHandleBack({
-    name: '(tabs)',
-    params: { screen: 'index' },
-  });
+  const handleBack = () => {
+    router.back();
+  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -60,6 +60,7 @@ export default function AddFriendScreen() {
       const result = await FriendService.sendFriendRequest(searchResult.id);
 
       if (result.success) {
+        emit(RefreshEvent.FRIEND_ADDED);
         Alert.alert('送信完了', '友達リクエストを送信しました', [
           {
             text: 'OK',

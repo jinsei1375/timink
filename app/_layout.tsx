@@ -1,5 +1,6 @@
 import '@/assets/css/global.css';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { RefreshProvider } from '@/contexts/RefreshContext';
 import { useNotificationObserver } from '@/hooks/useNotificationObserver';
 import { supabase } from '@/lib/supabase';
 import * as QueryParams from 'expo-auth-session/build/QueryParams';
@@ -29,7 +30,9 @@ const createSessionFromUrl = async (url: string) => {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutContent />
+      <RefreshProvider>
+        <RootLayoutContent />
+      </RefreshProvider>
     </AuthProvider>
   );
 }

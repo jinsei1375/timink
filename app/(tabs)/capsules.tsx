@@ -3,10 +3,11 @@ import { CapsuleFilter } from '@/components/capsule/CapsuleFilter';
 import { EmptyState } from '@/components/capsule/EmptyState';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleStatus, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -19,6 +20,7 @@ import {
 
 export default function CapsulesScreen() {
   const { user } = useAuth();
+  const { subscribe } = useRefresh();
   const [capsules, setCapsules] = useState<CapsuleWithMembers[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -26,7 +28,7 @@ export default function CapsulesScreen() {
     'all'
   );
 
-  const loadCapsules = async () => {
+  const loadCapsules = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -45,20 +47,24 @@ export default function CapsulesScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadCapsules();
-  }, [user]);
+  }, [loadCapsules]);
 
-  // 画面がフォーカスされた時にリロード（削除後などに対応）
-  useFocusEffect(
-    useCallback(() => {
-      if (user && !loading) {
-        loadCapsules();
-      }
-    }, [user])
-  );
+  // カプセル関連イベントを購読
+  useEffect(() => {
+    const unsubscribers = [
+      subscribe(RefreshEvent.CAPSULE_CREATED, loadCapsules),
+      subscribe(RefreshEvent.CAPSULE_UPDATED, loadCapsules),
+      subscribe(RefreshEvent.CAPSULE_UNLOCKED, loadCapsules),
+    ];
+
+    return () => {
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [subscribe, loadCapsules]);
 
   const handleRefresh = () => {
     setRefreshing(true);

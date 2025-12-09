@@ -3,11 +3,12 @@ import { CreateConfirmModal } from '@/components/capsule/CreateConfirmModal';
 import { DatePickerModal } from '@/components/capsule/DatePickerModal';
 import { DateSelector } from '@/components/capsule/DateSelector';
 import { FormInput } from '@/components/capsule/FormInput';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
-import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { TypeSelector } from '@/components/ui/TypeSelector';
 import { useAuth } from '@/contexts/AuthContext';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { FriendService } from '@/services/friendService';
@@ -26,6 +27,7 @@ import {
 
 export default function CreateCapsuleScreen() {
   const { user } = useAuth();
+  const { emit } = useRefresh();
   const [loading, setLoading] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
 
@@ -141,6 +143,8 @@ export default function CreateCapsuleScreen() {
 
       const createdCapsule = await capsuleService.createCapsule(capsuleData, user.id);
 
+      emit(RefreshEvent.CAPSULE_CREATED);
+
       // 作成したカプセルの詳細画面に遷移
       router.replace(`/capsule/${createdCapsule.id}` as any);
     } catch (error) {
@@ -213,7 +217,13 @@ export default function CreateCapsuleScreen() {
                 <Text className="text-red-500">*</Text>
               </Text>
               {friends.length === 0 ? (
-                <InfoBox type="warning" message="友達がいません。先に友達を追加してください。" />
+                <EmptyState
+                  icon="person.2"
+                  title="友達がいません"
+                  description="まず友達を追加してください"
+                  actionLabel="友達を追加"
+                  onAction={() => router.push('/friend/add')}
+                />
               ) : (
                 <View>
                   {friends.map((friend) => {

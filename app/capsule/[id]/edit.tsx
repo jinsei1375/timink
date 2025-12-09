@@ -7,6 +7,7 @@ import { BackButton } from '@/components/ui/BackButton';
 import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { StorageService } from '@/services/storageService';
@@ -21,6 +22,7 @@ export default function EditCapsuleContentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
+  const { emit } = useRefresh();
   const [capsule, setCapsule] = useState<CapsuleWithMembers | null>(null);
   const [content, setContent] = useState<CapsuleContentWithAuthor | null>(null);
   const [textContent, setTextContent] = useState('');
@@ -136,6 +138,9 @@ export default function EditCapsuleContentScreen() {
         text_content: textContent.trim() || undefined,
         media_url: mediaUrl || undefined,
       });
+
+      // イベント発火で関連画面を更新
+      emit(RefreshEvent.CAPSULE_UPDATED);
 
       Alert.alert('保存完了', 'コンテンツを保存しました', [
         {

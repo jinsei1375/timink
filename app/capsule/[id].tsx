@@ -3,12 +3,13 @@ import { UserAvatar } from '@/components/diary/UserAvatar';
 import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -23,6 +24,7 @@ export default function CapsuleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
+  const { subscribe, emit } = useRefresh();
   const [capsule, setCapsule] = useState<CapsuleWithMembers | null>(null);
   const [contents, setContents] = useState<CapsuleContentWithAuthor[]>([]);
   const [userContent, setUserContent] = useState<CapsuleContentWithAuthor | null>(null);
@@ -34,13 +36,7 @@ export default function CapsuleDetailScreen() {
     params: { screen: 'capsules' },
   });
 
-  useEffect(() => {
-    if (id) {
-      loadData();
-    }
-  }, [id]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id || !user?.id) {
       setLoading(false);
       return;
@@ -64,7 +60,23 @@ export default function CapsuleDetailScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user?.id]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // カプセル更新・開封イベントを購読
+  useEffect(() => {
+    const unsubscribers = [
+      subscribe(RefreshEvent.CAPSULE_UPDATED, loadData),
+      subscribe(RefreshEvent.CAPSULE_UNLOCKED, loadData),
+    ];
+
+    return () => {
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [subscribe, loadData]);
 
   const handleUnlock = async () => {
     if (!capsule) return;
@@ -72,8 +84,8 @@ export default function CapsuleDetailScreen() {
     try {
       setUnlocking(true);
       await capsuleService.unlockCapsule(capsule.id);
+      emit(RefreshEvent.CAPSULE_UNLOCKED);
       Alert.alert('開封完了', 'タイムカプセルを開封しました！');
-      loadData(); // 再読み込み
     } catch (error) {
       console.error('Error unlocking capsule:', error);
       Alert.alert('エラー', 'カプセルの開封に失敗しました');

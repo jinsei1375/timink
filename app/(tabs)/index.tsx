@@ -2,6 +2,7 @@ import { ActivityCard } from '@/components/home/ActivityCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { ActivityService } from '@/services/activityService';
 import { ActivitySection } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +20,7 @@ import {
 export default function HomeScreen() {
   const router = useRouter();
   const { user, profile } = useAuth();
+  const { subscribe } = useRefresh();
   const [sections, setSections] = useState<ActivitySection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -40,6 +42,23 @@ export default function HomeScreen() {
   useEffect(() => {
     loadActivities();
   }, [loadActivities]);
+
+  // イベント購読で必要な時だけリロード
+  useEffect(() => {
+    const unsubscribers = [
+      subscribe(RefreshEvent.CAPSULE_CREATED, loadActivities),
+      subscribe(RefreshEvent.CAPSULE_UPDATED, loadActivities),
+      subscribe(RefreshEvent.CAPSULE_UNLOCKED, loadActivities),
+      subscribe(RefreshEvent.DIARY_CREATED, loadActivities),
+      subscribe(RefreshEvent.DIARY_UPDATED, loadActivities),
+      subscribe(RefreshEvent.FRIEND_ADDED, loadActivities),
+      subscribe(RefreshEvent.FRIEND_ACCEPTED, loadActivities),
+    ];
+
+    return () => {
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [subscribe, loadActivities]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);

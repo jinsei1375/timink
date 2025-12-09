@@ -1,7 +1,8 @@
 import { DiaryCard } from '@/components/diary/DiaryCard';
-import { EmptyState } from '@/components/diary/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { DiaryService, DiaryWithDetails } from '@/services/diaryService';
 import { formatDate } from '@/utils/formatDate';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,11 +20,12 @@ import {
 export default function DiariesScreen() {
   const router = useRouter();
   const { profile } = useAuth();
+  const { subscribe } = useRefresh();
   const [diaries, setDiaries] = useState<DiaryWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadDiaries = async () => {
+  const loadDiaries = useCallback(async () => {
     try {
       const data = await DiaryService.getMyDiaries();
       // ピン留め順 > 更新日順 でソート
@@ -40,11 +42,23 @@ export default function DiariesScreen() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadDiaries();
-  }, []);
+  }, [loadDiaries]);
+
+  // 日記関連イベントを購読
+  useEffect(() => {
+    const unsubscribers = [
+      subscribe(RefreshEvent.DIARY_CREATED, loadDiaries),
+      subscribe(RefreshEvent.DIARY_UPDATED, loadDiaries),
+    ];
+
+    return () => {
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [subscribe, loadDiaries]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);

@@ -1,5 +1,6 @@
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { DiaryService } from '@/services/diaryService';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -19,6 +20,7 @@ export default function NewEntryScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
+  const { emit } = useRefresh();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,6 +32,7 @@ export default function NewEntryScreen() {
       const result = await DiaryService.createEntry(id, content.trim());
 
       if (result.success) {
+        emit(RefreshEvent.DIARY_UPDATED);
         Alert.alert('投稿完了', '日記を投稿しました！', [
           {
             text: 'OK',

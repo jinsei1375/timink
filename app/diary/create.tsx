@@ -1,7 +1,8 @@
-import { EmptyState } from '@/components/diary/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { TypeSelector } from '@/components/ui/TypeSelector';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
 
@@ -23,6 +24,7 @@ import {
 
 export default function CreateDiaryScreen() {
   const router = useRouter();
+  const { emit } = useRefresh();
   const [title, setTitle] = useState('');
   const [diaryType, setDiaryType] = useState<DiaryType>(DiaryType.Personal);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -84,6 +86,7 @@ export default function CreateDiaryScreen() {
       const result = await DiaryService.createDiary(title, selectedFriends, diaryType);
 
       if (result.success) {
+        emit(RefreshEvent.DIARY_CREATED);
         Alert.alert('作成完了', '交換日記を作成しました', [
           {
             text: 'OK',
@@ -120,7 +123,7 @@ export default function CreateDiaryScreen() {
         title="友達がいません"
         description="まず友達を追加してください"
         actionLabel="友達を追加"
-        onAction={() => router.push('/(tabs)/add-friend')}
+        onAction={() => router.push('/friend/add')}
       />
     ),
     [router]

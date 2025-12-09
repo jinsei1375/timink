@@ -1,10 +1,11 @@
 import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
 import { FriendService } from '@/services/friendService';
 import { Friend, FriendRequest } from '@/types';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -17,12 +18,13 @@ import {
 
 export default function FriendsScreen() {
   const router = useRouter();
+  const { subscribe, emit } = useRefresh();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [friendsData, requestsData] = await Promise.all([
         FriendService.getFriends(),
@@ -36,11 +38,23 @@ export default function FriendsScreen() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
+
+  // 友達関連イベントを購読
+  useEffect(() => {
+    const unsubscribers = [
+      subscribe(RefreshEvent.FRIEND_ADDED, loadData),
+      subscribe(RefreshEvent.FRIEND_ACCEPTED, loadData),
+    ];
+
+    return () => {
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [subscribe, loadData]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -50,8 +64,8 @@ export default function FriendsScreen() {
   const handleAcceptRequest = async (requestId: string) => {
     const result = await FriendService.acceptFriendRequest(requestId);
     if (result.success) {
+      emit(RefreshEvent.FRIEND_ACCEPTED);
       Alert.alert('成功', '友達リクエストを承認しました');
-      loadData();
     } else {
       Alert.alert('エラー', '承認に失敗しました');
     }
@@ -60,8 +74,8 @@ export default function FriendsScreen() {
   const handleRejectRequest = async (requestId: string) => {
     const result = await FriendService.rejectFriendRequest(requestId);
     if (result.success) {
+      emit(RefreshEvent.FRIEND_ACCEPTED);
       Alert.alert('完了', '友達リクエストを拒否しました');
-      loadData();
     } else {
       Alert.alert('エラー', '拒否に失敗しました');
     }
@@ -126,7 +140,7 @@ export default function FriendsScreen() {
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-lg font-bold text-gray-800">友達 ({friends.length})</Text>
                 <TouchableOpacity
-                  onPress={() => router.push('/(tabs)/add-friend')}
+                  onPress={() => router.push('/friend/add')}
                   className="bg-app-primary px-3 py-1.5 rounded-lg flex-row items-center"
                 >
                   <IconSymbol name="person.badge.plus" size={16} color="#fff" />
@@ -141,7 +155,7 @@ export default function FriendsScreen() {
                     友達を追加して交換日記を始めましょう
                   </Text>
                   <TouchableOpacity
-                    onPress={() => router.push('/(tabs)/add-friend')}
+                    onPress={() => router.push('/friend/add')}
                     className="bg-app-primary px-6 py-3 rounded-lg mt-4"
                   >
                     <Text className="text-white font-semibold">友達を追加</Text>
