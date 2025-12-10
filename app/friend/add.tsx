@@ -1,9 +1,9 @@
 import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
-import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { FriendService } from '@/services/friendService';
-import { FriendshipStatus, UserSearchResult } from '@/types';
+import { FriendshipStatus, RefreshEvent, UserSearchResult } from '@/types';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';

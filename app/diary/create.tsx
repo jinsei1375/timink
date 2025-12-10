@@ -2,11 +2,11 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { TypeSelector } from '@/components/ui/TypeSelector';
-import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { DiaryService } from '@/services/diaryService';
 
 import { FriendService } from '@/services/friendService';
-import { DiaryType, Friend } from '@/types';
+import { DiaryType, Friend, RefreshEvent } from '@/types';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {

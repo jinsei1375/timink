@@ -2,9 +2,9 @@ import { DiaryPageView } from '@/components/diary/DiaryPageView';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
-import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { DiaryService } from '@/services/diaryService';
-import { DiaryEntry, Profile } from '@/types';
+import { DiaryEntry, Profile, RefreshEvent } from '@/types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -25,7 +25,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 interface DiaryDetail {
   id: string;
   title: string;
-  is_group: boolean;
+  diary_type: string;
   created_by: string;
   created_at: string;
   updated_at: string;

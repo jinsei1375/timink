@@ -1,9 +1,9 @@
 import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { FriendService } from '@/services/friendService';
-import { Friend, FriendRequest } from '@/types';
+import { Friend, FriendRequest, RefreshEvent } from '@/types';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {

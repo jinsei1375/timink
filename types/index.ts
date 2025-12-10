@@ -65,11 +65,24 @@ export interface Profile {
 export interface Diary {
   id: string;
   title: string;
-  is_group: boolean;
   diary_type: DiaryType;
   created_by: string;
   created_at: string;
   updated_at: string;
+  is_pinned: boolean;
+}
+
+// 交換日記と最新エントリー、メンバー情報を含む型
+export interface DiaryWithDetails {
+  id: string;
+  title: string;
+  diary_type: DiaryType;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  members: Profile[];
+  latest_entry?: DiaryEntry & { author: Profile };
+  unread_count: number;
   is_pinned: boolean;
 }
 
@@ -91,6 +104,7 @@ export interface DiaryMember {
   id: string;
   diary_id: string;
   profile_id: string;
+  is_pinned: boolean;
   joined_at: string;
 }
 
@@ -193,113 +207,6 @@ export interface CapsuleContentWithAuthor extends CapsuleContent {
   author?: Profile;
 }
 
-// Database Schema Types
-export interface Database {
-  public: {
-    Tables: {
-      profiles: {
-        Row: Profile;
-        Insert: {
-          id: string;
-          user_id: string;
-          display_name?: string | null;
-          avatar_url?: string | null;
-          bio?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          display_name?: string | null;
-          avatar_url?: string | null;
-          bio?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      diaries: {
-        Row: Diary;
-        Insert: {
-          id?: string;
-          title: string;
-          is_group?: boolean;
-          created_by: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          is_group?: boolean;
-          created_by?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      diary_entries: {
-        Row: DiaryEntry;
-        Insert: {
-          id?: string;
-          diary_id: string;
-          author_id: string;
-          content: string;
-          image_url?: string | null;
-          audio_url?: string | null;
-          posted_date?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          diary_id?: string;
-          author_id?: string;
-          content?: string;
-          image_url?: string | null;
-          audio_url?: string | null;
-          posted_date?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      diary_members: {
-        Row: DiaryMember;
-        Insert: {
-          id?: string;
-          diary_id: string;
-          profile_id: string;
-          joined_at?: string;
-        };
-        Update: {
-          id?: string;
-          diary_id?: string;
-          profile_id?: string;
-          joined_at?: string;
-        };
-      };
-      friendships: {
-        Row: Friendship;
-        Insert: {
-          id?: string;
-          requester_id: string;
-          addressee_id: string;
-          status?: FriendshipStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          requester_id?: string;
-          addressee_id?: string;
-          status?: FriendshipStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-    };
-  };
-}
-
 // Auth Types
 export interface AuthState {
   user: User | null;
@@ -340,4 +247,23 @@ export interface Activity {
 export interface ActivitySection {
   title: string;
   activities: Activity[];
+}
+
+// UI Component Types
+export type TypeOption<T> = {
+  value: T;
+  icon: any; // Ionicons.glyphMap key
+  title: string;
+  description: string;
+};
+
+// Refresh Events
+export enum RefreshEvent {
+  CAPSULE_CREATED = 'capsule:created',
+  CAPSULE_UPDATED = 'capsule:updated',
+  CAPSULE_UNLOCKED = 'capsule:unlocked',
+  DIARY_CREATED = 'diary:created',
+  DIARY_UPDATED = 'diary:updated',
+  FRIEND_ADDED = 'friend:added',
+  FRIEND_ACCEPTED = 'friend:accepted',
 }

@@ -1,7 +1,8 @@
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
-import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { DiaryService } from '@/services/diaryService';
+import { RefreshEvent } from '@/types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {

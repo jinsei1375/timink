@@ -1,12 +1,6 @@
+import { TypeOption } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
-
-export type TypeOption<T> = {
-  value: T;
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  description: string;
-};
 
 type Props<T> = {
   label?: string;

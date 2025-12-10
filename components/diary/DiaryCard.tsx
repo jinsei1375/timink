@@ -1,7 +1,6 @@
 import { MemberListModal } from '@/components/ui/MemberListModal';
 import { PinBadge } from '@/components/ui/PinBadge';
-import { DiaryWithDetails } from '@/services/diaryService';
-import { DiaryType } from '@/types';
+import { DiaryType, DiaryWithDetails } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 

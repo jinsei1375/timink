@@ -1,3 +1,4 @@
+import { RefreshEvent } from '@/types';
 import { createContext, useCallback, useContext, useRef } from 'react';
 
 type RefreshListener = () => void;
@@ -5,16 +6,6 @@ type RefreshListener = () => void;
 interface RefreshContextType {
   subscribe: (event: RefreshEvent, listener: RefreshListener) => () => void;
   emit: (event: RefreshEvent) => void;
-}
-
-export enum RefreshEvent {
-  CAPSULE_CREATED = 'capsule:created',
-  CAPSULE_UPDATED = 'capsule:updated',
-  CAPSULE_UNLOCKED = 'capsule:unlocked',
-  DIARY_CREATED = 'diary:created',
-  DIARY_UPDATED = 'diary:updated',
-  FRIEND_ADDED = 'friend:added',
-  FRIEND_ACCEPTED = 'friend:accepted',
 }
 
 const RefreshContext = createContext<RefreshContextType | null>(null);

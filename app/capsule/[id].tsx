@@ -3,9 +3,15 @@ import { UserAvatar } from '@/components/diary/UserAvatar';
 import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
-import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { capsuleService } from '@/services/capsuleService';
-import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
+import {
+  CapsuleContentWithAuthor,
+  CapsuleStatus,
+  CapsuleType,
+  CapsuleWithMembers,
+  RefreshEvent,
+} from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';

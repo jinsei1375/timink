@@ -8,10 +8,10 @@ import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { TypeSelector } from '@/components/ui/TypeSelector';
 import { useAuth } from '@/contexts/AuthContext';
-import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { capsuleService } from '@/services/capsuleService';
 import { FriendService } from '@/services/friendService';
-import { CapsuleType, Friend } from '@/types';
+import { CapsuleType, Friend, RefreshEvent } from '@/types';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
