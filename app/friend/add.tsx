@@ -18,7 +18,7 @@ export default function AddFriendScreen() {
   const [isSendingRequest, setIsSendingRequest] = useState(false);
 
   const handleBack = () => {
-    router.back();
+    router.replace('/(tabs)/friends');
   };
 
   const handleSearch = async () => {

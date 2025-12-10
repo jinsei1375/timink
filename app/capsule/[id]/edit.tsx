@@ -8,7 +8,6 @@ import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
-import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { StorageService } from '@/services/storageService';
 import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleWithMembers } from '@/types';
@@ -32,10 +31,9 @@ export default function EditCapsuleContentScreen() {
   const [uploading, setUploading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const handleBack = useHandleBack({
-    name: 'capsule/[id]',
-    params: { id },
-  });
+  const handleBack = () => {
+    router.replace(`/capsule/${id}`);
+  };
 
   useEffect(() => {
     if (id && user) {

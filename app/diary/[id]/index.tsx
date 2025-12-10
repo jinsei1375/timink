@@ -3,7 +3,6 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
-import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
 import { DiaryEntry, Profile } from '@/types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -48,10 +47,9 @@ export default function DiaryDetailScreen() {
   const [canPost, setCanPost] = useState(false);
   const [nextPostTime, setNextPostTime] = useState<Date | null>(null);
 
-  const handleBack = useHandleBack({
-    name: '(tabs)',
-    params: { screen: 'diaries' },
-  });
+  const handleBack = () => {
+    router.replace('/(tabs)/diaries');
+  };
 
   const loadDiaryData = useCallback(async () => {
     if (!id) return;

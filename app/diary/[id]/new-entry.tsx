@@ -24,6 +24,10 @@ export default function NewEntryScreen() {
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleBack = () => {
+    router.replace(`/diary/${id}`);
+  };
+
   const handlePost = async () => {
     if (!content.trim() || !id || isSubmitting) return;
 
@@ -36,7 +40,7 @@ export default function NewEntryScreen() {
         Alert.alert('投稿完了', '日記を投稿しました！', [
           {
             text: 'OK',
-            onPress: () => router.back(),
+            onPress: handleBack,
           },
         ]);
       } else {
@@ -52,7 +56,7 @@ export default function NewEntryScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScreenHeader title="日記を書く" onBack={() => router.back()} />
+      <ScreenHeader title="日記を書く" onBack={handleBack} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"

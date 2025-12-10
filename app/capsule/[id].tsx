@@ -4,7 +4,6 @@ import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
-import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleContentWithAuthor, CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,10 +30,9 @@ export default function CapsuleDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [unlocking, setUnlocking] = useState(false);
 
-  const handleBack = useHandleBack({
-    name: '(tabs)',
-    params: { screen: 'capsules' },
-  });
+  const handleBack = () => {
+    router.replace('/(tabs)/capsules');
+  };
 
   const loadData = useCallback(async () => {
     if (!id || !user?.id) {

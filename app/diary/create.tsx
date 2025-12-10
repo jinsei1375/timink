@@ -3,7 +3,6 @@ import { FriendSelectItem } from '@/components/ui/FriendSelectItem';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { TypeSelector } from '@/components/ui/TypeSelector';
 import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
-import { useHandleBack } from '@/hooks/useHandleBack';
 import { DiaryService } from '@/services/diaryService';
 
 import { FriendService } from '@/services/friendService';
@@ -32,10 +31,9 @@ export default function CreateDiaryScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleBack = useHandleBack({
-    name: '(tabs)',
-    params: { screen: 'diaries' },
-  });
+  const handleBack = () => {
+    router.replace('/(tabs)/diaries');
+  };
 
   // 画面から離れるときにフォームをリセット
   useFocusEffect(

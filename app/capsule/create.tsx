@@ -9,7 +9,6 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { TypeSelector } from '@/components/ui/TypeSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { RefreshEvent, useRefresh } from '@/contexts/RefreshContext';
-import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { FriendService } from '@/services/friendService';
 import { CapsuleType, Friend } from '@/types';
@@ -42,10 +41,9 @@ export default function CreateCapsuleScreen() {
   const [tempDate, setTempDate] = useState(new Date());
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
 
-  const handleBack = useHandleBack({
-    name: '(tabs)',
-    params: { screen: 'capsules' },
-  });
+  const handleBack = () => {
+    router.replace('/(tabs)/capsules');
+  };
 
   // 画面から離れるときにフォームをリセット
   useFocusEffect(

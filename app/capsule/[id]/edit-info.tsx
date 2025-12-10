@@ -1,7 +1,6 @@
 import { InfoBox } from '@/components/ui/InfoBox';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
-import { useHandleBack } from '@/hooks/useHandleBack';
 import { capsuleService } from '@/services/capsuleService';
 import { CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,10 +26,9 @@ export default function EditCapsuleInfoScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const handleBack = useHandleBack({
-    name: 'capsule/[id]',
-    params: { id },
-  });
+  const handleBack = () => {
+    router.replace(`/capsule/${id}`);
+  };
 
   useEffect(() => {
     if (id && user) {
