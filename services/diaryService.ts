@@ -269,10 +269,11 @@ export class DiaryService {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', diaryId);
 
-      // 通知を送信（バックグラウンドで実行）
+      // 通知を送信
       if (profile && diary) {
         NotificationService.sendDiaryEntryNotification(
           diaryId,
+          user.id,
           profile.display_name || 'メンバー',
           diary.title
         ).catch((err) => console.error('通知送信エラー:', err));

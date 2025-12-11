@@ -4,6 +4,7 @@ const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
 
 interface NotificationRequest {
   diaryId: string;
+  authorId: string;
   authorName: string;
   diaryTitle: string;
   type: string;
@@ -22,7 +23,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { diaryId, authorName, diaryTitle, type }: NotificationRequest = await req.json();
+    const { diaryId, authorId, authorName, diaryTitle, type }: NotificationRequest =
+      await req.json();
+
+    if (!diaryId || !authorId) {
+      throw new Error(`Missing required fields: diaryId=${diaryId}, authorId=${authorId}`);
+    }
 
     // Supabaseクライアントを作成
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -45,7 +51,9 @@ Deno.serve(async (req) => {
       .from('diary_members')
       .select('profile_id, profiles!inner(expo_push_token)')
       .eq('diary_id', diaryId)
-      .neq('profile_id', user.id);
+      .neq('profile_id', authorId);
+
+    console.log('通知対象メンバー:', members);
 
     if (membersError) throw membersError;
 
@@ -99,7 +107,8 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('通知送信エラー:', error);
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',

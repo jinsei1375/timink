@@ -108,6 +108,7 @@ export class NotificationService {
    */
   static async sendDiaryEntryNotification(
     diaryId: string,
+    authorId: string,
     authorName: string,
     diaryTitle: string
   ): Promise<void> {
@@ -116,6 +117,7 @@ export class NotificationService {
       const { data, error } = await supabase.functions.invoke('send-notification', {
         body: {
           diaryId,
+          authorId,
           authorName,
           diaryTitle,
           type: 'diary_entry',
