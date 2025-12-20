@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-type Language = 'ja' | 'en';
+type Language = 'ja' | 'en' | 'zh' | 'ko' | 'fr' | 'hi' | 'id' | 'es';
 
 interface LanguageContextType {
   language: Language;
