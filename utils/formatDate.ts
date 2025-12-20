@@ -20,10 +20,7 @@ export function formatDate(dateString: string): string {
   if (diffHours < 24) return `${diffHours}時間前`;
   if (diffDays < 7) return `${diffDays}日前`;
 
-  return date.toLocaleDateString('ja-JP', {
-    month: 'short',
-    day: 'numeric',
-  });
+  return date.toLocaleDateString('ja-JP');
 }
 
 /**
@@ -35,11 +32,7 @@ export function formatDate(dateString: string): string {
  */
 export function formatAbsoluteDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleDateString('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return date.toLocaleDateString('ja-JP');
 }
 
 /**

@@ -6,6 +6,7 @@ import { CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -17,6 +18,7 @@ import {
 } from 'react-native';
 
 export default function EditCapsuleInfoScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
@@ -48,7 +50,7 @@ export default function EditCapsuleInfoScreen() {
       }
     } catch (error) {
       console.error('Error loading capsule:', error);
-      Alert.alert('エラー', 'カプセル情報の読み込みに失敗しました');
+      Alert.alert(t('common.error'), t('capsule.loadError'));
     } finally {
       setLoading(false);
     }
@@ -56,7 +58,7 @@ export default function EditCapsuleInfoScreen() {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      Alert.alert('エラー', 'タイトルを入力してください');
+      Alert.alert(t('common.error'), t('capsule.titleRequired'));
       return;
     }
 
@@ -68,7 +70,7 @@ export default function EditCapsuleInfoScreen() {
         description: description.trim() || undefined,
       });
 
-      Alert.alert('保存完了', 'カプセル情報を更新しました', [
+      Alert.alert(t('capsule.saveComplete'), t('capsule.infoUpdated'), [
         {
           text: 'OK',
           onPress: handleBack,
@@ -76,7 +78,7 @@ export default function EditCapsuleInfoScreen() {
       ]);
     } catch (error) {
       console.error('Error updating capsule:', error);
-      Alert.alert('エラー', 'カプセル情報の更新に失敗しました');
+      Alert.alert(t('common.error'), t('capsule.infoUpdateError'));
     } finally {
       setSaving(false);
     }
@@ -94,7 +96,7 @@ export default function EditCapsuleInfoScreen() {
     return (
       <View className="flex-1 bg-white items-center justify-center p-6">
         <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
-        <Text className="text-gray-500 text-center mt-4">カプセルが見つかりませんでした</Text>
+        <Text className="text-gray-500 text-center mt-4">{t('capsule.notFound')}</Text>
       </View>
     );
   }
@@ -108,7 +110,7 @@ export default function EditCapsuleInfoScreen() {
             <Pressable onPress={handleBack}>
               <Ionicons name="close" size={28} color="white" />
             </Pressable>
-            <Text className="text-white text-lg font-bold">カプセル情報編集</Text>
+            <Text className="text-white text-lg font-bold">{t('capsule.editInfo')}</Text>
             <View style={{ width: 28 }} />
           </View>
         </View>
@@ -117,12 +119,14 @@ export default function EditCapsuleInfoScreen() {
           <View className="bg-red-50 rounded-full p-6 mb-4">
             <Ionicons name="lock-closed" size={48} color="#DC2626" />
           </View>
-          <Text className="text-xl font-bold text-gray-900 mb-2 text-center">編集できません</Text>
+          <Text className="text-xl font-bold text-gray-900 mb-2 text-center">
+            {t('capsule.cannotEdit')}
+          </Text>
           <Text className="text-base text-gray-600 text-center mb-6">
-            このカプセルの情報を編集する権限がありません。
+            {t('capsule.noPermission')}
           </Text>
           <Pressable onPress={handleBack} className="bg-app-primary px-8 py-3 rounded-xl">
-            <Text className="text-white font-semibold">戻る</Text>
+            <Text className="text-white font-semibold">{t('common.back')}</Text>
           </Pressable>
         </View>
       </View>
@@ -132,19 +136,19 @@ export default function EditCapsuleInfoScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <ScreenHeader title="カプセル情報編集" onBack={handleBack} />
+      <ScreenHeader title={t('capsule.editInfo')} onBack={handleBack} />
 
       {/* コンテンツ */}
       <ScrollView className="flex-1 p-6">
         {/* タイトル */}
         <View className="mb-6">
           <Text className="text-gray-700 font-semibold mb-2">
-            タイトル <Text className="text-red-500">*</Text>
+            {t('capsule.title')} <Text className="text-red-500">*</Text>
           </Text>
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="タイムカプセルのタイトル"
+            placeholder={t('capsule.titlePlaceholder')}
             className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-base"
             maxLength={50}
           />
@@ -153,11 +157,11 @@ export default function EditCapsuleInfoScreen() {
 
         {/* 説明文 */}
         <View className="mb-6">
-          <Text className="text-gray-700 font-semibold mb-2">説明文</Text>
+          <Text className="text-gray-700 font-semibold mb-2">{t('capsule.description')}</Text>
           <TextInput
             value={description}
             onChangeText={setDescription}
-            placeholder="カプセルの説明（オプション）"
+            placeholder={t('capsule.descriptionOptional')}
             className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-base"
             multiline
             numberOfLines={4}
@@ -170,8 +174,8 @@ export default function EditCapsuleInfoScreen() {
         {/* 注意事項 */}
         <InfoBox
           type="info"
-          title="編集について"
-          message={`タイトルと説明文はいつでも編集できます。\n変更はすべてのメンバーに反映されます。`}
+          title={t('capsule.editAbout')}
+          message={t('capsule.editAboutMessage')}
         />
       </ScrollView>
 
@@ -185,7 +189,7 @@ export default function EditCapsuleInfoScreen() {
           {saving ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white text-base font-semibold">変更を保存</Text>
+            <Text className="text-white text-base font-semibold">{t('capsule.saveChanges')}</Text>
           )}
         </Pressable>
       </View>

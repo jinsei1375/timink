@@ -1,6 +1,7 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { Profile } from '@/types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
 interface UserAvatarProps {
@@ -21,6 +22,7 @@ const SIZE_CONFIG = {
  */
 export const UserAvatar = React.memo<UserAvatarProps>(
   ({ user, size = 'medium', showName = false }) => {
+    const { t } = useTranslation();
     const config = SIZE_CONFIG[size];
 
     return (
@@ -28,7 +30,7 @@ export const UserAvatar = React.memo<UserAvatarProps>(
         <Avatar uri={user.avatar_url} size={config.size} />
         {showName && (
           <Text className={`${config.name} text-gray-700 font-medium mt-1`} numberOfLines={1}>
-            {user.display_name || '名前なし'}
+            {user.display_name || t('common.noName')}
           </Text>
         )}
       </View>

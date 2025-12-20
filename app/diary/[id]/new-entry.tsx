@@ -5,6 +5,7 @@ import { DiaryService } from '@/services/diaryService';
 import { RefreshEvent } from '@/types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -18,6 +19,7 @@ import {
 } from 'react-native';
 
 export default function NewEntryScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
@@ -38,18 +40,18 @@ export default function NewEntryScreen() {
 
       if (result.success) {
         emit(RefreshEvent.DIARY_UPDATED);
-        Alert.alert('投稿完了', '日記を投稿しました！', [
+        Alert.alert(t('diary.postComplete'), t('diary.posted'), [
           {
             text: 'OK',
             onPress: handleBack,
           },
         ]);
       } else {
-        Alert.alert('エラー', '投稿に失敗しました');
+        Alert.alert(t('common.error'), t('diary.postError'));
       }
     } catch (error) {
-      console.error('投稿エラー:', error);
-      Alert.alert('エラー', '投稿中にエラーが発生しました');
+      console.error(t('diary.postError'), error);
+      Alert.alert(t('common.error'), t('diary.postErrorOccurred'));
     } finally {
       setIsSubmitting(false);
     }
@@ -57,7 +59,7 @@ export default function NewEntryScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScreenHeader title="日記を書く" onBack={handleBack} />
+      <ScreenHeader title={t('diary.writeEntry')} onBack={handleBack} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -67,7 +69,7 @@ export default function NewEntryScreen() {
           <TextInput
             value={content}
             onChangeText={setContent}
-            placeholder="今日の出来事を書いてみよう..."
+            placeholder={t('diary.placeholder')}
             placeholderTextColor="#9CA3AF"
             multiline
             className="text-base text-gray-800 min-h-[200px]"
@@ -86,7 +88,7 @@ export default function NewEntryScreen() {
             {isSubmitting ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text className="text-white text-base font-semibold">投稿する</Text>
+              <Text className="text-white text-base font-semibold">{t('diary.post')}</Text>
             )}
           </Pressable>
         </View>

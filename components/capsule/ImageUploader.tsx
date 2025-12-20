@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Image, Pressable, Text, View } from 'react-native';
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export function ImageUploader({ imageUri, onPickImage, onRemoveImage }: Props) {
+  const { t } = useTranslation();
   if (imageUri) {
     return (
       <View className="relative">
@@ -28,7 +30,7 @@ export function ImageUploader({ imageUri, onPickImage, onRemoveImage }: Props) {
       className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl h-48 items-center justify-center"
     >
       <Ionicons name="image-outline" size={48} color="#9CA3AF" />
-      <Text className="text-gray-500 mt-2">タップして画像を選択</Text>
+      <Text className="text-gray-500 mt-2">{t('capsule.imageUpload')}</Text>
     </Pressable>
   );
 }

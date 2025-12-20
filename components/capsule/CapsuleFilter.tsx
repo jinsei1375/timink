@@ -1,4 +1,5 @@
 import { CapsuleStatus } from '@/types';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 type FilterType = 'all' | CapsuleStatus.Locked | CapsuleStatus.Unlocked;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 export function CapsuleFilter({ filter, onFilterChange }: Props) {
+  const { t } = useTranslation();
+
   return (
     <View className="px-4 py-4 bg-gray-50">
       <View className="flex-row gap-2">
@@ -21,7 +24,7 @@ export function CapsuleFilter({ filter, onFilterChange }: Props) {
           <Text
             className={`text-sm font-medium ${filter === 'all' ? 'text-white' : 'text-gray-600'}`}
           >
-            すべて
+            {t('capsule.filter.all')}
           </Text>
         </Pressable>
         <Pressable
@@ -37,7 +40,7 @@ export function CapsuleFilter({ filter, onFilterChange }: Props) {
               filter === CapsuleStatus.Locked ? 'text-white' : 'text-gray-600'
             }`}
           >
-            ロック中
+            {t('capsule.filter.locked')}
           </Text>
         </Pressable>
         <Pressable
@@ -53,7 +56,7 @@ export function CapsuleFilter({ filter, onFilterChange }: Props) {
               filter === CapsuleStatus.Unlocked ? 'text-white' : 'text-gray-600'
             }`}
           >
-            開封済み
+            {t('capsule.filter.unlocked')}
           </Text>
         </Pressable>
       </View>

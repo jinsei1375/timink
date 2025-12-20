@@ -53,7 +53,7 @@ export class FriendService {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error('認証が必要です');
+      if (!user) throw new Error('AUTH_REQUIRED');
 
       const { error } = await supabase.from('friendships').insert({
         requester_id: user.id,

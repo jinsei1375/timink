@@ -1,6 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -18,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type AuthMode = 'signin' | 'signup';
 
 export default function AuthScreen() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,17 +31,17 @@ export default function AuthScreen() {
 
   const handleEmailAuth = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('エラー', 'メールアドレスとパスワードを入力してください');
+      Alert.alert(t('common.error'), t('auth.validationError'));
       return;
     }
 
     if (mode === 'signup') {
       if (password !== confirmPassword) {
-        Alert.alert('エラー', 'パスワードが一致しません');
+        Alert.alert(t('common.error'), t('auth.passwordMismatch'));
         return;
       }
       if (!displayName.trim()) {
-        Alert.alert('エラー', '表示名を入力してください');
+        Alert.alert(t('common.error'), t('auth.displayNameRequired'));
         return;
       }
     }
@@ -51,13 +53,13 @@ export default function AuthScreen() {
         await signIn(email, password);
       } else {
         await signUp(email, password, displayName);
-        Alert.alert(
-          '成功',
-          'アカウントが作成されました。確認メールを送信しました。\n\nシミュレーターではメールリンクが正常に動作しない場合があります。実機でテストするか、ログイン画面からログインしてください。'
-        );
+        Alert.alert(t('auth.signUpSuccess'), t('auth.signUpMessage'));
       }
     } catch (error) {
-      Alert.alert('エラー', error instanceof Error ? error.message : 'エラーが発生しました');
+      Alert.alert(
+        t('common.error'),
+        error instanceof Error ? error.message : t('auth.errorOccurred')
+      );
     } finally {
       setIsLoading(false);
     }
@@ -69,8 +71,8 @@ export default function AuthScreen() {
       await signInWithGoogle();
     } catch (error) {
       Alert.alert(
-        'エラー',
-        error instanceof Error ? error.message : 'Googleサインインに失敗しました'
+        t('common.error'),
+        error instanceof Error ? error.message : t('auth.errorOccurred')
       );
     } finally {
       setIsLoading(false);
@@ -102,19 +104,21 @@ export default function AuthScreen() {
             />
             <Text className="text-3xl font-bold text-gray-900 mb-2">Timink</Text>
             <Text className="text-base text-gray-500">
-              {isSignUp ? 'アカウントを作成' : 'ようこそ'}
+              {isSignUp ? t('auth.signUp') : t('home.welcome')}
             </Text>
           </View>
 
           <View className="mb-8">
             {isSignUp && (
               <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-2">表示名</Text>
+                <Text className="text-sm font-medium text-gray-700 mb-2">
+                  {t('auth.displayName')}
+                </Text>
                 <TextInput
                   className="border border-gray-300 rounded-lg px-4 py-3 text-base bg-gray-50"
                   value={displayName}
                   onChangeText={setDisplayName}
-                  placeholder="表示名を入力"
+                  placeholder={t('auth.displayName')}
                   autoCapitalize="none"
                   editable={!isLoading}
                 />
@@ -122,12 +126,12 @@ export default function AuthScreen() {
             )}
 
             <View className="mb-4">
-              <Text className="text-sm font-medium text-gray-700 mb-2">メールアドレス</Text>
+              <Text className="text-sm font-medium text-gray-700 mb-2">{t('auth.email')}</Text>
               <TextInput
                 className="border border-gray-300 rounded-lg px-4 py-3 text-base bg-gray-50"
                 value={email}
                 onChangeText={setEmail}
-                placeholder="メールアドレスを入力"
+                placeholder={t('auth.email')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -136,12 +140,12 @@ export default function AuthScreen() {
             </View>
 
             <View className="mb-4">
-              <Text className="text-sm font-medium text-gray-700 mb-2">パスワード</Text>
+              <Text className="text-sm font-medium text-gray-700 mb-2">{t('auth.password')}</Text>
               <TextInput
                 className="border border-gray-300 rounded-lg px-4 py-3 text-base bg-gray-50"
                 value={password}
                 onChangeText={setPassword}
-                placeholder="パスワードを入力"
+                placeholder={t('auth.password')}
                 secureTextEntry
                 autoCapitalize="none"
                 editable={!isLoading}
@@ -150,12 +154,14 @@ export default function AuthScreen() {
 
             {isSignUp && (
               <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-2">パスワード確認</Text>
+                <Text className="text-sm font-medium text-gray-700 mb-2">
+                  {t('auth.confirmPassword')}
+                </Text>
                 <TextInput
                   className="border border-gray-300 rounded-lg px-4 py-3 text-base bg-gray-50"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  placeholder="パスワードを再入力"
+                  placeholder={t('auth.confirmPassword')}
                   secureTextEntry
                   autoCapitalize="none"
                   editable={!isLoading}
@@ -174,14 +180,14 @@ export default function AuthScreen() {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text className="text-white text-base font-semibold">
-                  {isSignUp ? 'アカウント作成' : 'ログイン'}
+                  {isSignUp ? t('auth.signUp') : t('auth.signIn')}
                 </Text>
               )}
             </TouchableOpacity>
 
             <View className="flex-row items-center mb-4">
               <View className="flex-1 h-px bg-gray-200" />
-              <Text className="mx-4 text-sm text-gray-500">または</Text>
+              <Text className="mx-4 text-sm text-gray-500">{t('common.or')}</Text>
               <View className="flex-1 h-px bg-gray-200" />
             </View>
 
@@ -192,7 +198,9 @@ export default function AuthScreen() {
             >
               <View className="flex-row items-center justify-center">
                 <IconSymbol name="google" size={20} color="#4285f4" />
-                <Text className="text-gray-700 text-base font-medium ml-2">Googleでログイン</Text>
+                <Text className="text-gray-700 text-base font-medium ml-2">
+                  {t('auth.signIn')} (Google)
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -200,9 +208,7 @@ export default function AuthScreen() {
           <View className="items-center">
             <TouchableOpacity onPress={toggleMode} disabled={isLoading}>
               <Text className="text-app-primary text-sm underline">
-                {isSignUp
-                  ? 'すでにアカウントをお持ちですか？ ログイン'
-                  : 'アカウントをお持ちでない方はこちら'}
+                {isSignUp ? t('auth.haveAccount') : t('auth.noAccount')}
               </Text>
             </TouchableOpacity>
           </View>

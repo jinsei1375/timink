@@ -8,6 +8,7 @@ import { ActivitySection, RefreshEvent } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -18,6 +19,7 @@ import {
 } from 'react-native';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, profile } = useAuth();
   const { subscribe } = useRefresh();
@@ -75,7 +77,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScreenHeader title="ホーム" />
+      <ScreenHeader title={t('home.title')} />
 
       <ScrollView
         className="flex-1"
@@ -87,10 +89,10 @@ export default function HomeScreen() {
             <View className="bg-gray-50 rounded-xl p-8 items-center">
               <IconSymbol name="bell.fill" size={48} color="#9CA3AF" />
               <Text className="text-gray-500 mt-4 text-center font-semibold">
-                新しいアクティビティはありません
+                {t('home.noActivity')}
               </Text>
               <Text className="text-gray-400 text-sm mt-2 text-center">
-                交換日記やタイムカプセルの{'\n'}新着情報がここに表示されます
+                {t('home.noActivityDescription')}
               </Text>
               <View className="flex-row gap-3 w-full mt-4">
                 <TouchableOpacity
@@ -98,7 +100,9 @@ export default function HomeScreen() {
                   className="flex-1 bg-indigo-100 py-4 rounded-xl items-center"
                 >
                   <Ionicons name="hourglass" size={24} color="#6C6EE6" />
-                  <Text className="text-indigo-700 font-semibold mt-1">カプセル作成</Text>
+                  <Text className="text-indigo-700 font-semibold mt-1">
+                    {t('home.createCapsule')}
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -106,7 +110,7 @@ export default function HomeScreen() {
                   className="flex-1 bg-indigo-100 py-4 rounded-xl items-center"
                 >
                   <Ionicons name="book" size={24} color="#6C6EE6" />
-                  <Text className="text-indigo-700 font-semibold mt-1">日記を始める</Text>
+                  <Text className="text-indigo-700 font-semibold mt-1">{t('home.startDiary')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -114,7 +118,9 @@ export default function HomeScreen() {
             <>
               {sections.map((section, index) => (
                 <View key={`section-${index}`} className="mb-6">
-                  <Text className="text-lg font-bold text-gray-800 mb-3">{section.title}</Text>
+                  <Text className="text-lg font-bold text-gray-800 mb-3">
+                    {t(section.titleKey)}
+                  </Text>
                   {section.activities.map((activity) => (
                     <ActivityCard key={activity.id} activity={activity} />
                   ))}

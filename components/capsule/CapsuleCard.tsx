@@ -6,6 +6,7 @@ import { CapsuleStatus, CapsuleType, CapsuleWithMembers } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 
 interface CapsuleCardProps {
@@ -15,6 +16,7 @@ interface CapsuleCardProps {
 }
 
 export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps) {
+  const { t } = useTranslation();
   const [showMembers, setShowMembers] = useState(false);
   const timeRemaining = capsuleService.getTimeUntilUnlock(capsule.unlock_at);
   const isLocked = capsule.status === CapsuleStatus.Locked;
@@ -22,9 +24,9 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
   const getCapsuleTypeLabel = () => {
     switch (capsule.capsule_type) {
       case CapsuleType.Personal:
-        return '個人';
+        return t('capsule.type.personal');
       case CapsuleType.WithFriends:
-        return '友達と';
+        return t('capsule.type.withFriends');
       default:
         return '';
     }
@@ -32,21 +34,21 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
 
   const getTimeRemainingText = () => {
     if (capsule.status === CapsuleStatus.Unlocked) {
-      return '開封済み';
+      return t('capsule.unlocked_status');
     }
 
     if (timeRemaining.isUnlockable) {
-      return '開封可能';
+      return t('capsule.unlockable');
     }
 
     const parts = [];
-    if (timeRemaining.days > 0) parts.push(`${timeRemaining.days}日`);
-    if (timeRemaining.hours > 0) parts.push(`${timeRemaining.hours}時間`);
+    if (timeRemaining.days > 0) parts.push(t('capsule.days', { count: timeRemaining.days }));
+    if (timeRemaining.hours > 0) parts.push(t('capsule.hours', { count: timeRemaining.hours }));
     if (timeRemaining.minutes > 0 && timeRemaining.days === 0) {
-      parts.push(`${timeRemaining.minutes}分`);
+      parts.push(t('capsule.minutes', { count: timeRemaining.minutes }));
     }
 
-    return parts.join(' ') + '後に開封可能';
+    return t('capsule.unlockAfter', { time: parts.join(' ') });
   };
 
   return (
@@ -73,7 +75,9 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
         </View>
         {capsule.contents_count !== undefined && (
           <View className="bg-gray-100 px-2 py-1 rounded-full">
-            <Text className="text-xs font-medium text-gray-600">{capsule.contents_count}件</Text>
+            <Text className="text-xs font-medium text-gray-600">
+              {t('capsule.contentsCount', { count: capsule.contents_count })}
+            </Text>
           </View>
         )}
       </View>
@@ -112,7 +116,9 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
             onPress={() => setShowMembers(true)}
           >
             <Ionicons name="people-outline" size={16} color="#6B7280" />
-            <Text className="text-sm text-gray-600">{capsule.members.length}人</Text>
+            <Text className="text-sm text-gray-600">
+              {t('capsule.membersCount', { count: capsule.members.length })}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -120,12 +126,7 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
       {/* 開封日 */}
       <View className="mt-3 pt-3 border-t border-gray-100">
         <Text className="text-xs text-gray-500">
-          開封日:{' '}
-          {new Date(capsule.unlock_at).toLocaleDateString('ja-JP', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          {t('capsule.unlockDate')}: {new Date(capsule.unlock_at).toLocaleDateString('ja-JP')}
         </Text>
       </View>
 
@@ -133,7 +134,7 @@ export function CapsuleCard({ capsule, onPress, onLongPress }: CapsuleCardProps)
         visible={showMembers}
         onClose={() => setShowMembers(false)}
         members={capsule.members?.map((m) => m.profile!).filter(Boolean) || []}
-        title="カプセルメンバー"
+        title={t('capsule.members')}
       />
     </Pressable>
   );

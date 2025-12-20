@@ -1,5 +1,6 @@
 import { InfoBox } from '@/components/ui/InfoBox';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, Text, View } from 'react-native';
 
 type Props = {
@@ -9,6 +10,8 @@ type Props = {
 };
 
 export function EditConfirmModal({ visible, onConfirm, onCancel }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <Pressable className="flex-1 bg-black/50 justify-center items-center" onPress={onCancel}>
@@ -21,28 +24,32 @@ export function EditConfirmModal({ visible, onConfirm, onCancel }: Props) {
               <Ionicons name="create-outline" size={32} color="#6C6EE6" />
             </View>
             <Text className="text-xl font-bold text-gray-900 text-center">
-              内容を保存しますか？
+              {t('capsule.saveConfirm')}
             </Text>
           </View>
 
           <View className="mb-6">
             <Text className="text-base text-gray-700 text-center mb-4">
-              保存すると、この内容で確定されます。
+              {t('capsule.saveNotice')}
             </Text>
             <InfoBox
               type="danger"
-              title="重要"
-              message={`保存後は二度と編集できません。\n内容をよく確認してから保存してください。`}
+              title={t('capsule.important')}
+              message={t('capsule.saveWarning')}
             />
           </View>
 
           <View className="gap-2">
             <Pressable onPress={onConfirm} className="p-4 rounded-xl bg-app-primary">
-              <Text className="text-center text-base font-semibold text-white">保存する</Text>
+              <Text className="text-center text-base font-semibold text-white">
+                {t('capsule.saveButton')}
+              </Text>
             </Pressable>
 
             <Pressable onPress={onCancel} className="p-4 rounded-xl bg-gray-100">
-              <Text className="text-center text-base font-medium text-gray-700">キャンセル</Text>
+              <Text className="text-center text-base font-medium text-gray-700">
+                {t('common.cancel')}
+              </Text>
             </Pressable>
           </View>
         </Pressable>

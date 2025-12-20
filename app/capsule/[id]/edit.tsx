@@ -15,9 +15,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 export default function EditCapsuleContentScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
@@ -59,7 +61,7 @@ export default function EditCapsuleContentScreen() {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      Alert.alert('エラー', 'データの読み込みに失敗しました');
+      Alert.alert(t('common.error'), t('capsule.dataLoadError'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +70,7 @@ export default function EditCapsuleContentScreen() {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('権限エラー', '写真ライブラリへのアクセス許可が必要です');
+      Alert.alert(t('capsule.permissionError'), t('capsule.photoLibraryPermission'));
       return;
     }
 
@@ -93,19 +95,19 @@ export default function EditCapsuleContentScreen() {
 
     // 開封済みの場合は編集不可
     if (capsule.status === CapsuleStatus.Unlocked) {
-      Alert.alert('エラー', '開封済みのカプセルは編集できません');
+      Alert.alert(t('common.error'), t('capsule.cannotEditOpened'));
       return;
     }
 
     // 既にコンテンツが存在する場合は保存不可
     if (content) {
-      Alert.alert('保存不可', 'このコンテンツは既に保存されているため、編集できません。');
+      Alert.alert(t('common.error'), t('capsule.cannotEditSaved'));
       return;
     }
 
     // テキストも画像も空の場合
     if (!textContent.trim() && !imageUri) {
-      Alert.alert('エラー', 'テキストまたは画像を入力してください');
+      Alert.alert(t('common.error'), t('capsule.textOrImageRequired'));
       return;
     }
 
@@ -140,7 +142,7 @@ export default function EditCapsuleContentScreen() {
       // イベント発火で関連画面を更新
       emit(RefreshEvent.CAPSULE_UPDATED);
 
-      Alert.alert('保存完了', 'コンテンツを保存しました', [
+      Alert.alert(t('capsule.saveComplete'), t('capsule.contentSavedMessage'), [
         {
           text: 'OK',
           onPress: handleBack,
@@ -150,9 +152,9 @@ export default function EditCapsuleContentScreen() {
       console.error('Error saving content:', error);
 
       if (error.message === 'EDIT_LIMIT_REACHED') {
-        Alert.alert('保存不可', 'このコンテンツは既に保存されているため、編集できません。');
+        Alert.alert(t('common.error'), t('capsule.cannotEditSaved'));
       } else {
-        Alert.alert('エラー', 'コンテンツの保存に失敗しました');
+        Alert.alert(t('common.error'), t('capsule.contentSaveError'));
       }
     } finally {
       setSaving(false);
@@ -172,7 +174,7 @@ export default function EditCapsuleContentScreen() {
     return (
       <View className="flex-1 bg-white items-center justify-center p-6">
         <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
-        <Text className="text-gray-500 text-center mt-4">カプセルが見つかりませんでした</Text>
+        <Text className="text-gray-500 text-center mt-4">{t('capsule.notFound')}</Text>
       </View>
     );
   }
@@ -186,7 +188,7 @@ export default function EditCapsuleContentScreen() {
             <View style={{ width: 40 }}>
               <BackButton onPress={handleBack} />
             </View>
-            <Text className="text-xl font-bold text-gray-800">コンテンツ編集</Text>
+            <Text className="text-xl font-bold text-gray-800">{t('capsule.editContent')}</Text>
             <View style={{ width: 40 }} />
           </View>
         </View>
@@ -195,19 +197,20 @@ export default function EditCapsuleContentScreen() {
           <View className="bg-red-50 rounded-full p-6 mb-4">
             <Ionicons name="lock-closed" size={48} color="#DC2626" />
           </View>
-          <Text className="text-xl font-bold text-gray-900 mb-2 text-center">編集できません</Text>
+          <Text className="text-xl font-bold text-gray-900 mb-2 text-center">
+            {t('capsule.cannotEdit')}
+          </Text>
           <Text className="text-base text-gray-600 text-center mb-6">
-            このコンテンツは既に保存されているため、{'\n'}
-            編集することができません。
+            {t('capsule.cannotEditSavedDetail')}
           </Text>
           <InfoBox
             type="danger"
-            title="保存済みコンテンツについて"
-            message="タイムカプセルのコンテンツは一度保存すると編集できません。タイトルや説明文は詳細画面から編集可能です。"
+            title={t('capsule.savedContentInfo')}
+            message={t('capsule.savedContentInfoMessage')}
             icon="lock-closed"
           />
           <Pressable onPress={handleBack} className="bg-app-primary px-8 py-3 rounded-xl mt-6">
-            <Text className="text-white font-semibold">戻る</Text>
+            <Text className="text-white font-semibold">{t('common.back')}</Text>
           </Pressable>
         </View>
       </View>
@@ -217,7 +220,7 @@ export default function EditCapsuleContentScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <ScreenHeader title="コンテンツ編集" onBack={handleBack} />
+      <ScreenHeader title={t('capsule.editContent')} onBack={handleBack} />
 
       {/* コンテンツ入力エリア */}
       <ScrollView className="flex-1 p-6">
@@ -225,7 +228,7 @@ export default function EditCapsuleContentScreen() {
           <Text className="text-gray-500 text-sm text-center">
             {capsule.title}
             {'\n'}
-            開封日時まで自分の投稿のみ閲覧できます
+            {t('capsule.viewUntilUnlock')}
           </Text>
         </View>
         {/* テキスト入力 */}
@@ -233,12 +236,12 @@ export default function EditCapsuleContentScreen() {
 
         {/* 画像アップロード */}
         <View className="mb-6">
-          <Text className="text-gray-700 font-semibold mb-2">画像</Text>
+          <Text className="text-gray-700 font-semibold mb-2">{t('capsule.image')}</Text>
           <ImageUploader imageUri={imageUri} onPickImage={pickImage} onRemoveImage={removeImage} />
         </View>
 
         {/* アップロード中の表示 */}
-        {uploading && <UploadingIndicator message="画像をアップロード中..." />}
+        {uploading && <UploadingIndicator message={t('capsule.uploadingImage')} />}
 
         {/* 注意事項 */}
         <EditNotice />
@@ -256,7 +259,7 @@ export default function EditCapsuleContentScreen() {
           {saving || uploading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white text-base font-semibold">コンテンツを保存</Text>
+            <Text className="text-white text-base font-semibold">{t('capsule.saveContent')}</Text>
           )}
         </Pressable>
       </View>

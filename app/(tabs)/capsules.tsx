@@ -9,6 +9,7 @@ import { CapsuleStatus, CapsuleWithMembers, RefreshEvent } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -19,6 +20,7 @@ import {
 } from 'react-native';
 
 export default function CapsulesScreen() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { subscribe } = useRefresh();
   const [capsules, setCapsules] = useState<CapsuleWithMembers[]>([]);

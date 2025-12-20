@@ -1,5 +1,6 @@
 import { Friend } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 type Props = {
@@ -15,10 +16,12 @@ export function FriendSelector({
   onToggleFriend,
   maxSelection,
 }: Props) {
+  const { t } = useTranslation();
+
   if (friends.length === 0) {
     return (
       <View className="bg-gray-50 p-4 rounded-xl">
-        <Text className="text-sm text-gray-600 text-center">友達がいません</Text>
+        <Text className="text-sm text-gray-600 text-center">{t('friends.empty')}</Text>
       </View>
     );
   }
@@ -44,7 +47,7 @@ export function FriendSelector({
               }`}
             >
               <Text className="text-base text-gray-900">
-                {friend.profile.display_name || '名前なし'}
+                {friend.profile.display_name || t('common.noName')}
               </Text>
               <Ionicons
                 name={isSelected ? 'checkbox' : 'square-outline'}

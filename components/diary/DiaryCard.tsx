@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 
 interface DiaryCardProps {
@@ -20,6 +21,7 @@ interface DiaryCardProps {
  */
 export const DiaryCard = React.memo<DiaryCardProps>(
   ({ diary, currentUserId, onPress, onLongPress, formatDate }) => {
+    const { t } = useTranslation();
     const [showMembers, setShowMembers] = useState(false);
 
     const handlePress = useCallback(() => {
@@ -34,7 +36,9 @@ export const DiaryCard = React.memo<DiaryCardProps>(
     }, [diary.id, onLongPress]);
 
     const getDiaryTypeLabel = () => {
-      return diary.diary_type === DiaryType.Personal ? '個人' : '友達と';
+      return diary.diary_type === DiaryType.Personal
+        ? t('diary.type.personal')
+        : t('diary.type.withFriends');
     };
 
     return (
@@ -52,7 +56,9 @@ export const DiaryCard = React.memo<DiaryCardProps>(
           </View>
           {diary.unread_count > 0 && (
             <View className="bg-red-500 px-2 py-1 rounded-full">
-              <Text className="text-white text-xs font-medium">{diary.unread_count}件</Text>
+              <Text className="text-white text-xs font-medium">
+                {t('capsule.contentsCount', { count: diary.unread_count })}
+              </Text>
             </View>
           )}
         </View>
@@ -74,7 +80,9 @@ export const DiaryCard = React.memo<DiaryCardProps>(
               onPress={() => setShowMembers(true)}
             >
               <Ionicons name="people-outline" size={16} color="#6B7280" />
-              <Text className="text-sm text-gray-600">{diary.members.length}人</Text>
+              <Text className="text-sm text-gray-600">
+                {t('diary.membersCount', { count: diary.members.length })}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -82,12 +90,7 @@ export const DiaryCard = React.memo<DiaryCardProps>(
         {/* 最終更新日 */}
         <View className="mt-3 pt-3 border-t border-gray-100">
           <Text className="text-xs text-gray-500">
-            最終更新:{' '}
-            {new Date(diary.updated_at).toLocaleDateString('ja-JP', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
+            {t('diary.lastUpdate')}: {new Date(diary.updated_at).toLocaleDateString('ja-JP', {})}
           </Text>
         </View>
 
@@ -95,7 +98,7 @@ export const DiaryCard = React.memo<DiaryCardProps>(
           visible={showMembers}
           onClose={() => setShowMembers(false)}
           members={diary.members}
-          title="交換日記メンバー"
+          title={t('diary.members')}
         />
       </Pressable>
     );

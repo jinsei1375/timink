@@ -1,6 +1,7 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { Friend } from '@/types';
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 interface FriendSelectItemProps {
@@ -14,6 +15,7 @@ interface FriendSelectItemProps {
  */
 export const FriendSelectItem = React.memo<FriendSelectItemProps>(
   ({ friend, isSelected, onToggle }) => {
+    const { t } = useTranslation();
     const handlePress = useCallback(() => {
       if (onToggle) {
         onToggle(friend.profile.id);
@@ -31,7 +33,7 @@ export const FriendSelectItem = React.memo<FriendSelectItemProps>(
         <Avatar uri={friend.profile.avatar_url} size={48} className="mr-3" />
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-800">
-            {friend.profile.display_name || '名前なし'}
+            {friend.profile.display_name || t('common.noName')}
           </Text>
           <Text className="text-sm text-gray-500">@{friend.profile.user_id}</Text>
         </View>

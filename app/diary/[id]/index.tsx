@@ -7,6 +7,7 @@ import { DiaryService } from '@/services/diaryService';
 import { DiaryEntry, Profile, RefreshEvent } from '@/types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Animated,
@@ -33,6 +34,7 @@ interface DiaryDetail {
 }
 
 export default function DiaryDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
@@ -77,7 +79,7 @@ export default function DiaryDetailScreen() {
         setNextPostTime(nextTime);
       }
     } catch (error) {
-      console.error('日記データ取得エラー:', error);
+      console.error(t('diary.dataLoadError'), error);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -177,10 +179,8 @@ export default function DiaryDetailScreen() {
         <View className="w-24 h-24 bg-gray-100 rounded-full items-center justify-center mb-6">
           <IconSymbol name="book.fill" size={48} color="#9CA3AF" />
         </View>
-        <Text className="text-gray-500 text-lg font-semibold mb-2">まだ投稿がありません</Text>
-        <Text className="text-gray-400 text-sm text-center px-8">
-          最初の1ページを書いてみましょう
-        </Text>
+        <Text className="text-gray-500 text-lg font-semibold mb-2">{t('diary.noEntries')}</Text>
+        <Text className="text-gray-400 text-sm text-center px-8">{t('diary.firstPage')}</Text>
       </View>
     ),
     []
@@ -197,7 +197,7 @@ export default function DiaryDetailScreen() {
   if (!diary) {
     return (
       <SafeAreaView>
-        <Text className="text-gray-500">日記が見つかりません</Text>
+        <Text className="text-gray-500">{t('diary.notFound')}</Text>
       </SafeAreaView>
     );
   }
@@ -206,7 +206,9 @@ export default function DiaryDetailScreen() {
     <View className="flex-1 bg-gradient-to-b from-gray-100 to-gray-50">
       <ScreenHeader
         title={diary.title}
-        subtitle={entries.length > 0 ? `📖 ${entries.length}ページの思い出` : undefined}
+        subtitle={
+          entries.length > 0 ? t('diary.pagesMemory', { count: entries.length }) : undefined
+        }
         onBack={handleBack}
       />
 
@@ -249,22 +251,26 @@ export default function DiaryDetailScreen() {
             onPress={() => router.push(`/diary/${id}/new-entry`)}
             className="bg-app-primary rounded-xl py-4 items-center flex-row justify-center"
           >
-            <Text className="text-white text-base font-semibold">今日の出来事を書く</Text>
+            <Text className="text-white text-base font-semibold">{t('diary.writeToday')}</Text>
           </Pressable>
         ) : nextPostTime ? (
           <View className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <Text className="text-amber-800 text-center font-semibold mb-1">
-              今日はもう投稿済みです
+              {t('diary.alreadyPosted')}
             </Text>
             <Text className="text-amber-600 text-sm text-center">
-              次の投稿は
-              {(() => {
-                const diff = nextPostTime.getTime() - new Date().getTime();
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                return `${hours > 0 ? hours + '時間' : ''}${minutes > 0 ? minutes + '分' : ''}`;
-              })()}
-              後に可能です
+              {t('diary.nextPost', {
+                hours: (() => {
+                  const diff = nextPostTime.getTime() - new Date().getTime();
+                  const hours = Math.floor(diff / (1000 * 60 * 60));
+                  return hours > 0 ? t('diary.hoursUnit', { count: hours }) : '';
+                })(),
+                minutes: (() => {
+                  const diff = nextPostTime.getTime() - new Date().getTime();
+                  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                  return minutes > 0 ? t('diary.minutesUnit', { count: minutes }) : '';
+                })(),
+              })}
             </Text>
           </View>
         ) : null}

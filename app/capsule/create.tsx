@@ -14,6 +14,7 @@ import { FriendService } from '@/services/friendService';
 import { CapsuleType, Friend, RefreshEvent } from '@/types';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -25,6 +26,7 @@ import {
 } from 'react-native';
 
 export default function CreateCapsuleScreen() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { emit } = useRefresh();
   const [loading, setLoading] = useState(false);
@@ -156,7 +158,7 @@ export default function CreateCapsuleScreen() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* ヘッダー */}
-      <ScreenHeader title="カプセル作成" onBack={handleBack} />
+      <ScreenHeader title={t('capsule.createTitle')} onBack={handleBack} />
 
       <ScrollView className="flex-1">
         <View className="p-4">

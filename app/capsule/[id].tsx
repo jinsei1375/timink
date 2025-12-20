@@ -227,11 +227,7 @@ export default function CapsuleDetailScreen() {
 
             {isUnlocked && capsule.unlocked_at && (
               <Text className="text-gray-600 text-sm">
-                {new Date(capsule.unlocked_at).toLocaleDateString('ja-JP', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {new Date(capsule.unlocked_at).toLocaleDateString('ja-JP')}
                 に開封されました
               </Text>
             )}

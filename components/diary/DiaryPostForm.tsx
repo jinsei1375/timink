@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface DiaryPostFormProps {
@@ -14,6 +15,7 @@ interface DiaryPostFormProps {
  */
 export const DiaryPostForm = React.memo<DiaryPostFormProps>(
   ({ onSubmit, canPost, nextPostTime, maxLength = 500 }) => {
+    const { t } = useTranslation();
     const [content, setContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,11 +43,13 @@ export const DiaryPostForm = React.memo<DiaryPostFormProps>(
       return (
         <View className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mx-4 mb-4">
           <Text className="text-amber-800 text-center font-semibold mb-1">
-            今日はもう投稿済みです
+            {t('diary.alreadyPosted')}
           </Text>
           <Text className="text-amber-600 text-sm text-center">
-            次の投稿は{hours > 0 ? `${hours}時間` : ''}
-            {minutes > 0 ? `${minutes}分` : ''}後に可能です
+            {t('diary.nextPost', {
+              hours: hours > 0 ? t('diary.hoursUnit', { count: hours }) : '',
+              minutes: minutes > 0 ? t('diary.minutesUnit', { count: minutes }) : '',
+            })}
           </Text>
         </View>
       );
@@ -58,7 +62,7 @@ export const DiaryPostForm = React.memo<DiaryPostFormProps>(
           <TextInput
             value={content}
             onChangeText={setContent}
-            placeholder="今日の出来事を書いてみよう..."
+            placeholder={t('diary.placeholder')}
             placeholderTextColor="#9CA3AF"
             multiline
             numberOfLines={4}
@@ -72,7 +76,7 @@ export const DiaryPostForm = React.memo<DiaryPostFormProps>(
         {/* 文字数カウントと投稿ボタン */}
         <View className="flex-row items-center justify-between">
           <Text className="text-sm text-gray-400">
-            {content.length}/{maxLength}文字
+            {t('diary.characterCount', { count: content.length, max: maxLength })}
           </Text>
 
           <TouchableOpacity
@@ -86,10 +90,10 @@ export const DiaryPostForm = React.memo<DiaryPostFormProps>(
             {isSubmitting ? (
               <>
                 <ActivityIndicator size="small" color="#fff" />
-                <Text className="text-white font-semibold ml-2">投稿中...</Text>
+                <Text className="text-white font-semibold ml-2">{t('diary.posting')}</Text>
               </>
             ) : (
-              <Text className="text-white font-semibold">投稿する</Text>
+              <Text className="text-white font-semibold">{t('diary.post')}</Text>
             )}
           </TouchableOpacity>
         </View>

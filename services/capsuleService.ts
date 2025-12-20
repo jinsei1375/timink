@@ -278,7 +278,7 @@ class CapsuleService {
     const canUnlock = await this.canUnlockCapsule(capsuleId);
 
     if (!canUnlock) {
-      throw new Error('このカプセルはまだ開封できません');
+      throw new Error('CAPSULE_NOT_UNLOCKABLE');
     }
 
     const { error } = await supabase
@@ -331,7 +331,7 @@ class CapsuleService {
 
     if (!data || data.length === 0) {
       console.error('No rows updated. Possible RLS policy issue or capsule not found.');
-      throw new Error('カプセルの削除に失敗しました（権限がないか、カプセルが見つかりません）');
+      throw new Error('CAPSULE_DELETE_FAILED');
     }
 
     console.log('Capsule deleted successfully:', data[0]);

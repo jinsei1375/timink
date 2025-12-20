@@ -1,31 +1,52 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { StorageService } from '@/services/storageService';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
+  const router = useRouter();
   const { user, profile, signOut, updateProfile, refreshProfile } = useAuth();
+  const { language } = useLanguage();
   const [isEditingUserId, setIsEditingUserId] = useState(false);
   const [newUserId, setNewUserId] = useState(profile?.user_id || '');
   const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
   const [newDisplayName, setNewDisplayName] = useState(profile?.display_name || '');
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const languageLabel =
+    language === 'ja' ? t('settings.language.japanese') : t('settings.language.english');
+
+  const handleNavigateLanguageSettings = () => {
+    router.push('/profile/language');
+  };
 
   const handleSignOut = () => {
-    Alert.alert('ログアウト', 'ログアウトしますか？', [
-      { text: 'キャンセル', style: 'cancel' },
+    Alert.alert(t('auth.logout'), t('auth.logoutConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'ログアウト',
+        text: t('auth.logout'),
         style: 'destructive',
         onPress: async () => {
           try {
             await signOut();
           } catch (error) {
-            Alert.alert('エラー', 'ログアウトに失敗しました');
+            Alert.alert(t('common.error'), t('auth.logoutError'));
           }
         },
       },
@@ -34,29 +55,29 @@ export default function ProfileScreen() {
 
   const handleUpdateUserId = async () => {
     if (!user || !newUserId.trim()) {
-      Alert.alert('エラー', 'ユーザーIDを入力してください');
+      Alert.alert(t('common.error'), t('profile.userIdError'));
       return;
     }
 
     // バリデーション
     if (!/^[a-zA-Z0-9_]+$/.test(newUserId)) {
-      Alert.alert('エラー', 'ユーザーIDは英数字とアンダースコアのみ使用できます');
+      Alert.alert(t('common.error'), t('profile.userIdFormatError'));
       return;
     }
 
     if (newUserId.length < 4 || newUserId.length > 20) {
-      Alert.alert('エラー', 'ユーザーIDは4文字以上20文字以内で設定してください');
+      Alert.alert(t('common.error'), t('profile.userIdLengthError'));
       return;
     }
 
     try {
       setIsLoading(true);
       await updateProfile({ user_id: newUserId });
-      Alert.alert('成功', 'ユーザーIDを更新しました');
+      Alert.alert(t('common.success'), t('profile.userId') + 'を更新しました');
       setIsEditingUserId(false);
     } catch (error: any) {
       console.error('❌ ユーザーID更新エラー:', error);
-      Alert.alert('エラー', error.message || 'ユーザーIDの更新に失敗しました');
+      Alert.alert(t('common.error'), error.message || t('profile.userId') + 'の更新に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +85,7 @@ export default function ProfileScreen() {
 
   const handleUpdateDisplayName = async () => {
     if (!user || !newDisplayName.trim()) {
-      Alert.alert('エラー', '表示名を入力してください');
+      Alert.alert(t('common.error'), t('profile.displayNameError'));
       return;
     }
 
@@ -123,10 +144,10 @@ export default function ProfileScreen() {
       // プロフィールを再取得して最新の状態に
       await refreshProfile();
 
-      Alert.alert('成功', 'プロフィール画像を更新しました。');
+      Alert.alert(t('common.success'), t('profile.avatarUpdated'));
     } catch (error) {
       console.error('Error changing avatar:', error);
-      Alert.alert('エラー', 'プロフィール画像の更新に失敗しました。');
+      Alert.alert(t('common.error'), t('profile.avatarUpdateError'));
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -134,8 +155,8 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScreenHeader title="プロフィール" />
-      <View className="flex-1 p-6">
+      <ScreenHeader title={t('profile.title')} />
+      <ScrollView className="flex-1 p-6">
         <View className="items-center mt-4">
           {/* アバター */}
           <View className="relative">
@@ -155,13 +176,13 @@ export default function ProfileScreen() {
             }`}
           >
             <Text className="text-white font-semibold">
-              {isUploadingAvatar ? 'アップロード中...' : '画像を変更'}
+              {isUploadingAvatar ? t('common.uploading') : t('profile.changeAvatar')}
             </Text>
           </TouchableOpacity>
 
           <View className="mt-8 w-full">
             <View className="bg-gray-50 p-4 rounded-lg mb-4">
-              <Text className="text-sm text-gray-500 mb-2">ユーザーID</Text>
+              <Text className="text-sm text-gray-500 mb-2">{t('profile.userId')}</Text>
               {isEditingUserId ? (
                 <View>
                   <TextInput
@@ -179,7 +200,7 @@ export default function ProfileScreen() {
                       className="flex-1 bg-app-primary py-2 rounded"
                     >
                       <Text className="text-white text-center font-semibold">
-                        {isLoading ? '保存中...' : '保存'}
+                        {isLoading ? t('common.saving') : t('common.save')}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -190,7 +211,9 @@ export default function ProfileScreen() {
                       disabled={isLoading}
                       className="flex-1 bg-gray-300 py-2 rounded"
                     >
-                      <Text className="text-gray-700 text-center font-semibold">キャンセル</Text>
+                      <Text className="text-gray-700 text-center font-semibold">
+                        {t('common.cancel')}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -203,14 +226,14 @@ export default function ProfileScreen() {
                       setIsEditingUserId(true);
                     }}
                   >
-                    <Text className="text-app-primary font-semibold">編集</Text>
+                    <Text className="text-app-primary font-semibold">{t('common.edit')}</Text>
                   </TouchableOpacity>
                 </View>
               )}
             </View>
 
             <View className="bg-gray-50 p-4 rounded-lg mb-4">
-              <Text className="text-sm text-gray-500 mb-2">表示名</Text>
+              <Text className="text-sm text-gray-500 mb-2">{t('profile.displayName')}</Text>
               {isEditingDisplayName ? (
                 <View>
                   <TextInput
@@ -227,7 +250,7 @@ export default function ProfileScreen() {
                       className="flex-1 bg-app-primary py-2 rounded"
                     >
                       <Text className="text-white text-center font-semibold">
-                        {isLoading ? '保存中...' : '保存'}
+                        {isLoading ? t('common.saving') : t('common.save')}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -238,7 +261,9 @@ export default function ProfileScreen() {
                       disabled={isLoading}
                       className="flex-1 bg-gray-300 py-2 rounded"
                     >
-                      <Text className="text-gray-700 text-center font-semibold">キャンセル</Text>
+                      <Text className="text-gray-700 text-center font-semibold">
+                        {t('common.cancel')}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -253,33 +278,44 @@ export default function ProfileScreen() {
                       setIsEditingDisplayName(true);
                     }}
                   >
-                    <Text className="text-app-primary font-semibold">編集</Text>
+                    <Text className="text-app-primary font-semibold">{t('common.edit')}</Text>
                   </TouchableOpacity>
                 </View>
               )}
             </View>
 
             <View className="bg-gray-50 p-4 rounded-lg mb-4">
-              <Text className="text-sm text-gray-500 mb-2">メールアドレス</Text>
+              <Text className="text-sm text-gray-500 mb-2">{t('profile.email')}</Text>
               <Text className="text-lg text-gray-800">{user?.email || 'No email'}</Text>
             </View>
 
             {profile?.bio && (
               <View className="bg-gray-50 p-4 rounded-lg mb-4">
-                <Text className="text-sm text-gray-500 mb-2">自己紹介</Text>
+                <Text className="text-sm text-gray-500 mb-2">{t('profile.bio')}</Text>
                 <Text className="text-lg text-gray-800">{profile.bio}</Text>
               </View>
             )}
+
+            <TouchableOpacity
+              onPress={handleNavigateLanguageSettings}
+              className="bg-gray-50 p-4 rounded-lg flex-row items-center justify-between"
+            >
+              <View>
+                <Text className="text-sm text-gray-500">{t('settings.language.title')}</Text>
+                <Text className="text-lg text-gray-800 mt-1">{languageLabel}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
             onPress={handleSignOut}
             className="mt-8 bg-red-500 px-6 py-3 rounded-lg"
           >
-            <Text className="text-white font-semibold">ログアウト</Text>
+            <Text className="text-white font-semibold">{t('auth.logout')}</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }

@@ -2,6 +2,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Profile } from '@/types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
 interface MemberAvatarGroupProps {
@@ -20,6 +21,7 @@ const SIZE_CONFIG = {
  */
 export const MemberAvatarGroup = React.memo<MemberAvatarGroupProps>(
   ({ members, size = 'medium' }) => {
+    const { t } = useTranslation();
     const config = SIZE_CONFIG[size];
 
     if (members.length === 0) {
@@ -39,7 +41,7 @@ export const MemberAvatarGroup = React.memo<MemberAvatarGroupProps>(
           <View key={member.id} className="items-center w-16">
             <Avatar uri={member.avatar_url} size={config.size} />
             <Text className="text-[8px] text-gray-600 mt-1 text-center" numberOfLines={1}>
-              {member.display_name || '未設定'}
+              {member.display_name || t('common.noName')}
             </Text>
           </View>
         ))}

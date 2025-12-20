@@ -60,7 +60,7 @@ export class DiaryService {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error('認証が必要です');
+      if (!user) throw new Error('AUTH_REQUIRED');
 
       // 日記作成
       const { data: diary, error: diaryError } = await supabase
@@ -234,7 +234,7 @@ export class DiaryService {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error('認証が必要です');
+      if (!user) throw new Error('AUTH_REQUIRED');
 
       // ユーザープロフィール取得
       const { data: profile } = await supabase
@@ -274,7 +274,7 @@ export class DiaryService {
         NotificationService.sendDiaryEntryNotification(
           diaryId,
           user.id,
-          profile.display_name || 'メンバー',
+          profile.display_name || 'Member',
           diary.title
         ).catch((err) => console.error('通知送信エラー:', err));
       }

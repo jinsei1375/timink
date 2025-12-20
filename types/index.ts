@@ -230,10 +230,13 @@ export interface SignInData {
 export interface Activity {
   id: string;
   type: ActivityType;
-  title: string;
-  description: string;
-  timestamp: string;
-  badge?: string;
+  titleKey: string; // 翻訳キー
+  descriptionKey: string; // 翻訳キー
+  params?: Record<string, any>; // 翻訳パラメータ（カプセル名、メンバー数など）
+  timestamp?: string; // 下位互換性のため残す（使用しない場合は空文字列）
+  timestampKey?: string; // タイムスタンプ用の翻訳キー
+  timestampParams?: Record<string, any>; // タイムスタンプ用パラメータ
+  badgeKey?: string; // バッジ用翻訳キー
   badgeColor?: string;
   icon: string;
   actionable: boolean;
@@ -245,7 +248,7 @@ export interface Activity {
 }
 
 export interface ActivitySection {
-  title: string;
+  titleKey: string; // 翻訳キー
   activities: Activity[];
 }
 

@@ -15,7 +15,7 @@ export class ActivityService {
       const unlockableCapsules = await this.getUnlockableCapsules(userId);
       if (unlockableCapsules.length > 0) {
         sections.push({
-          title: '開封可能なタイムカプセル',
+          titleKey: 'activity.unlockableCapsule',
           activities: unlockableCapsules,
         });
       }
@@ -24,7 +24,7 @@ export class ActivityService {
       const availableDiaries = await this.getAvailableDiaries(profileId);
       if (availableDiaries.length > 0) {
         sections.push({
-          title: '今日投稿できる交換日記',
+          titleKey: 'activity.postableDiary',
           activities: availableDiaries,
         });
       }
@@ -33,7 +33,7 @@ export class ActivityService {
       const pendingCapsules = await this.getPendingCapsules(userId);
       if (pendingCapsules.length > 0) {
         sections.push({
-          title: '投稿待ちのタイムカプセル',
+          titleKey: 'activity.pendingCapsule',
           activities: pendingCapsules,
         });
       }
@@ -42,7 +42,7 @@ export class ActivityService {
       const memories = await this.getDiaryMemories(profileId);
       if (memories.length > 0) {
         sections.push({
-          title: '思い出を振り返る',
+          titleKey: 'activity.memories',
           activities: memories,
         });
       }
@@ -51,7 +51,7 @@ export class ActivityService {
       const friendRequests = await this.getFriendRequests(profileId);
       if (friendRequests.length > 0) {
         sections.push({
-          title: '友達申請',
+          titleKey: 'activity.friendRequests',
           activities: friendRequests,
         });
       }
@@ -70,18 +70,22 @@ export class ActivityService {
     try {
       const capsules = await capsuleService.getUnlockableCapsules(userId);
 
-      return capsules.slice(0, 3).map((capsule) => ({
-        id: `unlockable-${capsule.id}`,
-        type: ActivityType.CapsuleUnlockable,
-        title: `「${capsule.title}」が開封できます`,
-        description: this.getUnlockDescription(capsule.unlock_at),
-        timestamp: '今すぐ',
-        badge: '開封する',
-        badgeColor: 'bg-red-500',
-        icon: 'lock-open',
-        actionable: true,
-        data: { capsuleId: capsule.id },
-      }));
+      return capsules.slice(0, 3).map((capsule) => {
+        const unlockParams = this.getUnlockDescriptionParams(capsule.unlock_at);
+        return {
+          id: `unlockable-${capsule.id}`,
+          type: ActivityType.CapsuleUnlockable,
+          titleKey: 'activity.capsuleUnlockableTitle',
+          descriptionKey: this.getUnlockDescriptionKey(capsule.unlock_at),
+          params: { title: capsule.title, ...unlockParams },
+          timestampKey: 'activity.now',
+          badgeKey: 'activity.unlock',
+          badgeColor: 'bg-red-500',
+          icon: 'lock-open',
+          actionable: true,
+          data: { capsuleId: capsule.id },
+        };
+      });
     } catch (error) {
       console.error('Error in getUnlockableCapsules:', error);
       return [];
@@ -95,20 +99,28 @@ export class ActivityService {
     try {
       const pendingCapsules = await capsuleService.getPendingCapsules(userId);
 
-      return pendingCapsules.slice(0, 3).map((capsule) => ({
-        id: `pending-${capsule.id}`,
-        type: ActivityType.CapsulePending,
-        title: `「${capsule.title}」にメッセージを追加`,
-        description: `メンバー${capsule.members?.length || 0}人のうち${
-          capsule.contents_count || 0
-        }人が投稿済み`,
-        timestamp: this.getUnlockCountdown(capsule.unlock_at),
-        badge: '投稿する',
-        badgeColor: 'bg-purple-500',
-        icon: 'create',
-        actionable: true,
-        data: { capsuleId: capsule.id },
-      }));
+      return pendingCapsules.slice(0, 3).map((capsule) => {
+        const countdownParams = this.getUnlockCountdownParams(capsule.unlock_at);
+        return {
+          id: `pending-${capsule.id}`,
+          type: ActivityType.CapsulePending,
+          titleKey: 'activity.capsulePendingTitle',
+          descriptionKey: 'activity.capsulePendingDescription',
+          params: {
+            title: capsule.title,
+            totalMembers: capsule.members?.length || 0,
+            postedCount: capsule.contents_count || 0,
+            ...countdownParams,
+          },
+          timestampKey: this.getUnlockCountdownKey(capsule.unlock_at),
+          timestampParams: countdownParams,
+          badgeKey: 'activity.post',
+          badgeColor: 'bg-purple-500',
+          icon: 'create',
+          actionable: true,
+          data: { capsuleId: capsule.id },
+        };
+      });
     } catch (error) {
       console.error('Error in getPendingCapsules:', error);
       return [];
@@ -143,10 +155,11 @@ export class ActivityService {
         .map((diary: any) => ({
           id: `diary-available-${diary.id}`,
           type: ActivityType.DiaryAvailable,
-          title: `「${diary.title}」に投稿できます`,
-          description: '投稿可能です',
+          titleKey: 'activity.diaryAvailableTitle',
+          descriptionKey: 'activity.diaryAvailableDescription',
+          params: { title: diary.title },
           timestamp: '',
-          badge: '書く',
+          badgeKey: 'activity.write',
           badgeColor: 'bg-indigo-500',
           icon: 'book',
           actionable: true,
@@ -189,10 +202,14 @@ export class ActivityService {
       return data.map((entry: any) => ({
         id: `memory-${entry.id}`,
         type: ActivityType.DiaryMemory,
-        title: `1年前の今日`,
-        description: `「${entry.diary.title}」: ${entry.content.substring(0, 50)}...`,
-        timestamp: '1年前',
-        badge: '振り返る',
+        titleKey: 'activity.memoryTitle',
+        descriptionKey: 'activity.memoryDescription',
+        params: {
+          diaryTitle: entry.diary.title,
+          content: entry.content.substring(0, 50),
+        },
+        timestampKey: 'activity.oneYearAgo',
+        badgeKey: 'activity.reflect',
         badgeColor: 'bg-blue-500',
         icon: 'time-outline',
         actionable: true,
@@ -228,18 +245,23 @@ export class ActivityService {
 
       if (error || !data) return [];
 
-      return data.map((req: any) => ({
-        id: `friend-request-${req.id}`,
-        type: ActivityType.FriendRequest,
-        title: `👥 ${req.requester.display_name || '名前なし'}さんから友達申請`,
-        description: '承認待ち',
-        timestamp: this.getRelativeTime(req.created_at),
-        badge: '確認',
-        badgeColor: 'bg-green-500',
-        icon: 'people',
-        actionable: true,
-        data: { friendRequestId: req.id },
-      }));
+      return data.map((req: any) => {
+        const timeParams = this.getRelativeTimeParams(req.created_at);
+        return {
+          id: `friend-request-${req.id}`,
+          type: ActivityType.FriendRequest,
+          titleKey: 'activity.friendRequestTitle',
+          descriptionKey: 'activity.friendRequestDescription',
+          params: { name: req.requester.display_name || 'Unknown', ...timeParams },
+          timestampKey: this.getRelativeTimeKey(req.created_at),
+          timestampParams: timeParams,
+          badgeKey: 'activity.confirm',
+          badgeColor: 'bg-green-500',
+          icon: 'people',
+          actionable: true,
+          data: { friendRequestId: req.id },
+        };
+      });
     } catch (error) {
       console.error('Error in getFriendRequests:', error);
       return [];
@@ -247,34 +269,60 @@ export class ActivityService {
   }
 
   // ヘルパー関数
-  private static getUnlockDescription(unlockAt: string): string {
+  private static getUnlockDescriptionKey(unlockAt: string): string {
     const diff = new Date(unlockAt).getTime() - Date.now();
     const daysAgo = Math.floor(-diff / (1000 * 60 * 60 * 24));
 
-    if (daysAgo === 0) return '今日開封可能になりました';
-    if (daysAgo === 1) return '昨日開封可能になりました';
-    return `${daysAgo}日前に開封可能になりました`;
+    if (daysAgo === 0) return 'activity.unlockedToday';
+    if (daysAgo === 1) return 'activity.unlockedYesterday';
+    return 'activity.unlockedDaysAgo';
   }
 
-  private static getUnlockCountdown(unlockAt: string): string {
+  private static getUnlockDescriptionParams(unlockAt: string): Record<string, any> {
+    const diff = new Date(unlockAt).getTime() - Date.now();
+    const daysAgo = Math.floor(-diff / (1000 * 60 * 60 * 24));
+    return { days: daysAgo };
+  }
+
+  private static getUnlockCountdownKey(unlockAt: string): string {
     const diff = new Date(unlockAt).getTime() - Date.now();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
-    if (days <= 0) return '今日開封';
-    if (days === 1) return '明日開封';
-    return `${days}日後に開封`;
+    if (days <= 0) return 'activity.unlockToday';
+    if (days === 1) return 'activity.unlockTomorrow';
+    return 'activity.unlockInDays';
   }
 
-  private static getRelativeTime(timestamp: string): string {
+  private static getUnlockCountdownParams(unlockAt: string): Record<string, any> {
+    const diff = new Date(unlockAt).getTime() - Date.now();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return { days };
+  }
+
+  private static getRelativeTimeKey(timestamp: string): string {
     const diff = Date.now() - new Date(timestamp).getTime();
     const minutes = Math.floor(diff / (1000 * 60));
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    if (minutes < 1) return 'たった今';
-    if (minutes < 60) return `${minutes}分前`;
-    if (hours < 24) return `${hours}時間前`;
-    if (days < 7) return `${days}日前`;
-    return new Date(timestamp).toLocaleDateString('ja-JP');
+    if (minutes < 1) return 'activity.justNow';
+    if (minutes < 60) return 'activity.minutesAgo';
+    if (hours < 24) return 'activity.hoursAgo';
+    if (days < 7) return 'activity.daysAgo';
+    return 'activity.fullDate';
+  }
+
+  private static getRelativeTimeParams(timestamp: string): Record<string, any> {
+    const diff = Date.now() - new Date(timestamp).getTime();
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    return {
+      minutes,
+      hours,
+      days,
+      date: new Date(timestamp).toLocaleDateString(),
+    };
   }
 }

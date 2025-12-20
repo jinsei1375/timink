@@ -1,7 +1,9 @@
 import '@/assets/css/global.css';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import { RefreshProvider } from '@/contexts/RefreshContext';
 import { useNotificationObserver } from '@/hooks/useNotificationObserver';
+import '@/i18n';
 import { supabase } from '@/lib/supabase';
 import * as QueryParams from 'expo-auth-session/build/QueryParams';
 import * as Linking from 'expo-linking';
@@ -29,11 +31,13 @@ const createSessionFromUrl = async (url: string) => {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RefreshProvider>
-        <RootLayoutContent />
-      </RefreshProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <RefreshProvider>
+          <RootLayoutContent />
+        </RefreshProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 

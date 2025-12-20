@@ -6,9 +6,11 @@ import { FriendService } from '@/services/friendService';
 import { FriendshipStatus, RefreshEvent, UserSearchResult } from '@/types';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function AddFriendScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { profile } = useAuth();
   const { emit } = useRefresh();
@@ -100,7 +102,7 @@ export default function AddFriendScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* ヘッダー */}
-      <ScreenHeader title="友達を追加" onBack={handleBack} />
+      <ScreenHeader title={t('friends.add')} onBack={handleBack} />
 
       {/* 検索フォーム */}
       <View className="px-6 py-6">

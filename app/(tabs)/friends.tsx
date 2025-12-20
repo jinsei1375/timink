@@ -6,6 +6,7 @@ import { FriendService } from '@/services/friendService';
 import { Friend, FriendRequest, RefreshEvent } from '@/types';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -17,6 +18,7 @@ import {
 } from 'react-native';
 
 export default function FriendsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { subscribe, emit } = useRefresh();
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -65,9 +67,9 @@ export default function FriendsScreen() {
     const result = await FriendService.acceptFriendRequest(requestId);
     if (result.success) {
       emit(RefreshEvent.FRIEND_ACCEPTED);
-      Alert.alert('成功', '友達リクエストを承認しました');
+      Alert.alert(t('common.success'), t('friends.acceptSuccess'));
     } else {
-      Alert.alert('エラー', '承認に失敗しました');
+      Alert.alert(t('common.error'), t('friends.acceptError'));
     }
   };
 
@@ -75,9 +77,9 @@ export default function FriendsScreen() {
     const result = await FriendService.rejectFriendRequest(requestId);
     if (result.success) {
       emit(RefreshEvent.FRIEND_ACCEPTED);
-      Alert.alert('完了', '友達リクエストを拒否しました');
+      Alert.alert(t('common.success'), t('friends.rejectSuccess'));
     } else {
-      Alert.alert('エラー', '拒否に失敗しました');
+      Alert.alert(t('common.error'), t('friends.rejectError'));
     }
   };
 
@@ -91,7 +93,7 @@ export default function FriendsScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScreenHeader title="友達" />
+      <ScreenHeader title={t('friends.title')} />
 
       <FlatList
         data={[]}
@@ -102,7 +104,9 @@ export default function FriendsScreen() {
             {/* 友達リクエスト */}
             {pendingRequests.length > 0 && (
               <View className="px-6 py-4">
-                <Text className="text-lg font-bold text-gray-800 mb-3">友達リクエスト</Text>
+                <Text className="text-lg font-bold text-gray-800 mb-3">
+                  {t('friends.friendRequests')}
+                </Text>
                 {pendingRequests.map((request) => (
                   <View
                     key={request.id}
@@ -120,13 +124,13 @@ export default function FriendsScreen() {
                           onPress={() => handleAcceptRequest(request.id)}
                           className="bg-app-primary px-4 py-2 rounded"
                         >
-                          <Text className="text-white font-semibold">承認</Text>
+                          <Text className="text-white font-semibold">{t('friends.accept')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => handleRejectRequest(request.id)}
                           className="bg-gray-300 px-4 py-2 rounded"
                         >
-                          <Text className="text-gray-700 font-semibold">拒否</Text>
+                          <Text className="text-gray-700 font-semibold">{t('friends.reject')}</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -138,27 +142,31 @@ export default function FriendsScreen() {
             {/* 友達一覧 */}
             <View className="px-6 py-4">
               <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-lg font-bold text-gray-800">友達 ({friends.length})</Text>
+                <Text className="text-lg font-bold text-gray-800">
+                  {t('friends.count', { count: friends.length })}
+                </Text>
                 <TouchableOpacity
                   onPress={() => router.push('/friend/add')}
                   className="bg-app-primary px-3 py-1.5 rounded-lg flex-row items-center"
                 >
                   <IconSymbol name="person.badge.plus" size={16} color="#fff" />
-                  <Text className="text-white text-sm font-semibold ml-1">追加</Text>
+                  <Text className="text-white text-sm font-semibold ml-1">
+                    {t('friends.addButton')}
+                  </Text>
                 </TouchableOpacity>
               </View>
               {friends.length === 0 ? (
                 <View className="bg-gray-50 rounded-lg p-8 items-center">
                   <IconSymbol name="person.2" size={48} color="#9CA3AF" />
-                  <Text className="text-gray-500 mt-4 text-center">まだ友達がいません</Text>
+                  <Text className="text-gray-500 mt-4 text-center">{t('friends.empty')}</Text>
                   <Text className="text-gray-400 text-sm mt-2 text-center">
-                    友達を追加して交換日記を始めましょう
+                    {t('friends.emptyDescription')}
                   </Text>
                   <TouchableOpacity
                     onPress={() => router.push('/friend/add')}
                     className="bg-app-primary px-6 py-3 rounded-lg mt-4"
                   >
-                    <Text className="text-white font-semibold">友達を追加</Text>
+                    <Text className="text-white font-semibold">{t('friends.add')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (

@@ -1,6 +1,7 @@
 import { DiaryEntry, Profile } from '@/types';
 import { formatAbsoluteDate, formatDate } from '@/utils/formatDate';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, Text, View } from 'react-native';
 import { UserAvatar } from './UserAvatar';
 
@@ -17,6 +18,7 @@ interface DiaryPageViewProps {
  */
 export const DiaryPageView = React.memo<DiaryPageViewProps>(
   ({ entry, currentUserId, currentPage, totalPages }) => {
+    const { t } = useTranslation();
     const isOwnEntry = entry.author_id === currentUserId;
 
     return (
@@ -53,7 +55,7 @@ export const DiaryPageView = React.memo<DiaryPageViewProps>(
                   <Text className="text-base font-bold text-gray-800">
                     {entry.author.display_name}
                     {isOwnEntry && (
-                      <Text className="text-sm text-gray-500 font-normal"> (あなた)</Text>
+                      <Text className="text-sm text-gray-500 font-normal"> ({t('diary.you')})</Text>
                     )}
                   </Text>
                   <Text className="text-xs text-gray-500">{formatDate(entry.created_at)}</Text>

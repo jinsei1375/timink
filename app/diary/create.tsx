@@ -9,6 +9,7 @@ import { FriendService } from '@/services/friendService';
 import { DiaryType, Friend, RefreshEvent } from '@/types';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -22,6 +23,7 @@ import {
 } from 'react-native';
 
 export default function CreateDiaryScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { emit } = useRefresh();
   const [title, setTitle] = useState('');
@@ -138,7 +140,7 @@ export default function CreateDiaryScreen() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* ヘッダー */}
-      <ScreenHeader title="交換日記を作成" onBack={handleBack} />
+      <ScreenHeader title={t('diary.createTitle')} onBack={handleBack} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

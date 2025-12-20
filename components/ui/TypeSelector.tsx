@@ -1,5 +1,6 @@
 import { TypeOption } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 type Props<T> = {
@@ -10,15 +11,17 @@ type Props<T> = {
 };
 
 export function TypeSelector<T extends string | number>({
-  label = 'タイプ',
+  label,
   options,
   selectedType,
   onSelect,
 }: Props<T>) {
+  const { t } = useTranslation();
+  const displayLabel = label || t('capsule.type.personal');
   return (
     <View className="mb-6">
       <Text className="text-sm font-semibold text-gray-700 mb-2">
-        {label} <Text className="text-red-500">*</Text>
+        {displayLabel} <Text className="text-red-500">*</Text>
       </Text>
       <View className="gap-2">
         {options.map((type) => (

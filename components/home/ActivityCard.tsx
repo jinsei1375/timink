@@ -2,6 +2,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Activity, ActivityType } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 interface ActivityCardProps {
@@ -10,6 +11,7 @@ interface ActivityCardProps {
 
 export function ActivityCard({ activity }: ActivityCardProps) {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handlePress = () => {
     if (!activity.actionable) return;
@@ -59,12 +61,16 @@ export function ActivityCard({ activity }: ActivityCardProps) {
 
         {/* コンテンツ */}
         <View className="flex-1">
-          <Text className="font-bold text-gray-800 text-base mb-1">{activity.title}</Text>
-          <Text className="text-sm text-gray-600" numberOfLines={2}>
-            {activity.description}
+          <Text className="font-bold text-gray-800 text-base mb-1">
+            {t(activity.titleKey, activity.params)}
           </Text>
-          {activity.timestamp && (
-            <Text className="text-xs text-gray-400 mt-1">{activity.timestamp}</Text>
+          <Text className="text-sm text-gray-600" numberOfLines={2}>
+            {t(activity.descriptionKey, activity.params)}
+          </Text>
+          {activity.timestampKey && (
+            <Text className="text-xs text-gray-400 mt-1">
+              {t(activity.timestampKey, activity.timestampParams)}
+            </Text>
           )}
         </View>
       </View>

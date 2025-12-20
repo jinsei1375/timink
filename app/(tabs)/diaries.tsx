@@ -9,6 +9,7 @@ import { formatDate } from '@/utils/formatDate';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -19,6 +20,7 @@ import {
 } from 'react-native';
 
 export default function DiariesScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { profile } = useAuth();
   const { subscribe } = useRefresh();
