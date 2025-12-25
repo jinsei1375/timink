@@ -84,25 +84,21 @@ export default function DiariesScreen() {
       const diary = diaries.find((d) => d.id === diaryId);
       if (!diary || !profile) return;
 
-      Alert.alert(
-        diary.title,
-        diary.is_pinned ? 'ピン留めを外しますか？' : 'この日記をピン留めしますか？',
-        [
-          { text: 'キャンセル', style: 'cancel' },
-          {
-            text: diary.is_pinned ? '外す' : 'ピン留め',
-            onPress: async () => {
-              try {
-                await DiaryService.togglePin(diary.id, profile.id, !!diary.is_pinned);
-                loadDiaries(); // リロード
-              } catch (error) {
-                console.error(error);
-                Alert.alert('エラー', 'ピン留めの更新に失敗しました');
-              }
-            },
+      Alert.alert(diary.title, diary.is_pinned ? t('diary.unpinConfirm') : t('diary.pinConfirm'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: diary.is_pinned ? t('diary.unpin') : t('diary.pin'),
+          onPress: async () => {
+            try {
+              await DiaryService.togglePin(diary.id, profile.id, !!diary.is_pinned);
+              loadDiaries(); // リロード
+            } catch (error) {
+              console.error(error);
+              Alert.alert(t('common.error'), t('diary.pinError'));
+            }
           },
-        ]
-      );
+        },
+      ]);
     },
     [diaries, profile]
   );
@@ -129,13 +125,13 @@ export default function DiariesScreen() {
     () => (
       <EmptyState
         icon="book.fill"
-        title="まだ交換日記がありません"
-        description="友達と新しい交換日記を始めましょう"
-        actionLabel="交換日記を作成"
+        title={t('diary.empty')}
+        description={t('diary.emptyDescription')}
+        actionLabel={t('diary.create')}
         onAction={handleCreateDiary}
       />
     ),
-    [handleCreateDiary]
+    [handleCreateDiary, t]
   );
 
   if (isLoading) {
@@ -149,7 +145,7 @@ export default function DiariesScreen() {
   return (
     <View className="flex-1 bg-gray-50">
       <ScreenHeader
-        title="交換日記"
+        title={t('diary.title')}
         rightElement={
           <TouchableOpacity onPress={handleCreateDiary}>
             <Ionicons name="add-circle-outline" size={28} color="#6C6EE6" />

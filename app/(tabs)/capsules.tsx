@@ -80,11 +80,11 @@ export default function CapsulesScreen() {
   const handleLongPress = (capsule: CapsuleWithMembers) => {
     Alert.alert(
       capsule.title,
-      capsule.is_pinned ? 'ピン留めを外しますか？' : 'このカプセルをピン留めしますか？',
+      capsule.is_pinned ? t('capsule.unpinConfirm') : t('capsule.pinConfirm'),
       [
-        { text: 'キャンセル', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: capsule.is_pinned ? '外す' : 'ピン留め',
+          text: capsule.is_pinned ? t('capsule.unpin') : t('capsule.pin'),
           onPress: async () => {
             if (!user) return;
             try {
@@ -92,7 +92,7 @@ export default function CapsulesScreen() {
               loadCapsules(); // リロード
             } catch (error) {
               console.error(error);
-              Alert.alert('エラー', 'ピン留めの更新に失敗しました');
+              Alert.alert(t('common.error'), t('capsule.pinError'));
             }
           },
         },
@@ -122,7 +122,7 @@ export default function CapsulesScreen() {
   return (
     <View className="flex-1 bg-gray-50">
       <ScreenHeader
-        title="タイムカプセル"
+        title={t('capsules.title')}
         rightElement={
           <TouchableOpacity onPress={handleCreatePress}>
             <Ionicons name="add-circle-outline" size={28} color="#6C6EE6" />
@@ -143,10 +143,7 @@ export default function CapsulesScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
         ListEmptyComponent={
-          <EmptyState
-            title="タイムカプセルがありません"
-            description="新しいタイムカプセルを作成して、未来の自分や友達にメッセージを送りましょう"
-          />
+          <EmptyState title={t('capsule.empty')} description={t('capsule.emptyDescription')} />
         }
       />
     </View>
