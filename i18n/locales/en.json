@@ -90,6 +90,11 @@
     "createError": "Failed to create time capsule",
     "empty": "No time capsules",
     "emptyDescription": "Create a new time capsule to send a message to your future self or friends",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinConfirm": "Pin this capsule?",
+    "unpinConfirm": "Unpin this capsule?",
+    "pinError": "Failed to update pin status",
     "members": "Members",
     "membersCount": "{{count}} members",
     "contentsCount": "{{count}} items",
@@ -160,7 +165,7 @@
     }
   },
   "diary": {
-    "title": "Exchange Diaries",
+    "title": "Diaries",
     "create": "Create Diary",
     "createTitle": "Create Exchange Diary",
     "writeEntry": "Write Entry",
@@ -171,6 +176,11 @@
     "descriptionPlaceholder": "Description (optional)",
     "empty": "No exchange diaries",
     "emptyDescription": "Create a new exchange diary to share memories with friends",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinConfirm": "Pin this diary?",
+    "unpinConfirm": "Unpin this diary?",
+    "pinError": "Failed to update pin status",
     "members": "Members",
     "membersCount": "{{count}} members",
     "lastUpdate": "Last update",
@@ -287,5 +297,15 @@
     "required": "{{field}} is required",
     "minLength": "{{field}} must be at least {{min}} characters",
     "maxLength": "{{field}} must be no more than {{max}} characters"
+  },
+  "notification": {
+    "diaryEntry": {
+      "title": "New Entry",
+      "body": "{{authorName}} posted to \"{{diaryTitle}}\""
+    },
+    "capsuleUnlocked": {
+      "title": "Capsule Unlocked",
+      "body": "{{unlockerName}} unlocked \"{{capsuleTitle}}\""
+    }
   }
 }

@@ -115,6 +115,11 @@
     "createError": "タイムカプセルの作成に失敗しました",
     "empty": "タイムカプセルがありません",
     "emptyDescription": "新しいタイムカプセルを作成して、未来の自分や友達にメッセージを送りましょう",
+    "pin": "ピン留め",
+    "unpin": "外す",
+    "pinConfirm": "このカプセルをピン留めしますか？",
+    "unpinConfirm": "ピン留めを外しますか？",
+    "pinError": "ピン留めの更新に失敗しました",
     "members": "メンバー",
     "membersCount": "{{count}}人",
     "contentsCount": "{{count}}件",
@@ -171,6 +176,11 @@
     "descriptionPlaceholder": "説明（任意）",
     "empty": "交換日記がありません",
     "emptyDescription": "新しい交換日記を作成して、友達と思い出を共有しましょう",
+    "pin": "ピン留め",
+    "unpin": "外す",
+    "pinConfirm": "この日記をピン留めしますか？",
+    "unpinConfirm": "ピン留めを外しますか？",
+    "pinError": "ピン留めの更新に失敗しました",
     "members": "メンバー",
     "membersCount": "{{count}}人",
     "lastUpdate": "最終更新",
@@ -287,5 +297,15 @@
     "required": "{{field}}は必須です",
     "minLength": "{{field}}は{{min}}文字以上入力してください",
     "maxLength": "{{field}}は{{max}}文字以内で入力してください"
+  },
+  "notification": {
+    "diaryEntry": {
+      "title": "新しい投稿",
+      "body": "{{authorName}}さんが「{{diaryTitle}}」に投稿しました"
+    },
+    "capsuleUnlocked": {
+      "title": "カプセルが開封されました",
+      "body": "{{unlockerName}}さんが「{{capsuleTitle}}」を開封しました"
+    }
   }
 }

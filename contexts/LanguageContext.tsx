@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,11 +33,21 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguage = async (lang: Language) => {
     try {
+      // AsyncStorageに保存
       await AsyncStorage.setItem('app_language', lang);
       setLanguageState(lang);
       i18n.changeLanguage(lang);
+
+      // Supabaseにも保存（ログイン中の場合）
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('profiles').update({ preferred_language: lang }).eq('id', user.id);
+      }
     } catch (error) {
       console.error('言語設定の保存エラー:', error);
+      throw error;
     }
   };
 
