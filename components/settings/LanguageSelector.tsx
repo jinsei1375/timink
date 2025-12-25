@@ -10,6 +10,12 @@ export function LanguageSelector() {
   const options = [
     { value: 'ja' as const, label: t('settings.language.japanese') },
     { value: 'en' as const, label: t('settings.language.english') },
+    { value: 'zh' as const, label: t('settings.language.chinese') },
+    { value: 'ko' as const, label: t('settings.language.korean') },
+    { value: 'fr' as const, label: t('settings.language.french') },
+    { value: 'hi' as const, label: t('settings.language.hindi') },
+    { value: 'id' as const, label: t('settings.language.indonesian') },
+    { value: 'es' as const, label: t('settings.language.spanish') },
   ];
 
   const confirmLanguageChange = (value: (typeof options)[number]['value'], label: string) => {
