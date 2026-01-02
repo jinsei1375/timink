@@ -293,5 +293,15 @@
     "required": "{{field}} आवश्यक है",
     "minLength": "{{field}} कम से कम {{min}} वर्णों का होना चाहिए",
     "maxLength": "{{field}} {{max}} वर्णों से अधिक नहीं होना चाहिए"
+  },
+  "notification": {
+    "diaryEntry": {
+      "title": "नई पोस्ट",
+      "body": "{{authorName}} ने \"{{diaryTitle}}\" में पोस्ट किया"
+    },
+    "capsuleUnlocked": {
+      "title": "कैप्सूल अनलॉक हो गया",
+      "body": "{{unlockerName}} ने \"{{capsuleTitle}}\" को अनलॉक किया"
+    }
   }
 }

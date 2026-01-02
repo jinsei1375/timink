@@ -122,7 +122,7 @@ export default function CapsulesScreen() {
   return (
     <View className="flex-1 bg-gray-50">
       <ScreenHeader
-        title={t('capsules.title')}
+        title={t('capsule.title')}
         rightElement={
           <TouchableOpacity onPress={handleCreatePress}>
             <Ionicons name="add-circle-outline" size={28} color="#6C6EE6" />

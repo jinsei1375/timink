@@ -29,8 +29,30 @@ export default function ProfileScreen() {
   const [newDisplayName, setNewDisplayName] = useState(profile?.display_name || '');
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const languageLabel =
-    language === 'ja' ? t('settings.language.japanese') : t('settings.language.english');
+
+  // 言語ラベルを取得
+  const getLanguageLabel = () => {
+    switch (language) {
+      case 'ja':
+        return t('settings.language.japanese');
+      case 'en':
+        return t('settings.language.english');
+      case 'zh':
+        return t('settings.language.chinese');
+      case 'ko':
+        return t('settings.language.korean');
+      case 'fr':
+        return t('settings.language.french');
+      case 'hi':
+        return t('settings.language.hindi');
+      case 'id':
+        return t('settings.language.indonesian');
+      case 'es':
+        return t('settings.language.spanish');
+      default:
+        return t('settings.language.english');
+    }
+  };
 
   const handleNavigateLanguageSettings = () => {
     router.push('/profile/language');
@@ -302,7 +324,7 @@ export default function ProfileScreen() {
             >
               <View>
                 <Text className="text-sm text-gray-500">{t('settings.language.title')}</Text>
-                <Text className="text-lg text-gray-800 mt-1">{languageLabel}</Text>
+                <Text className="text-lg text-gray-800 mt-1">{getLanguageLabel()}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>

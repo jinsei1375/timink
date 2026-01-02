@@ -293,5 +293,15 @@
     "required": "{{field}} wajib diisi",
     "minLength": "{{field}} harus minimal {{min}} karakter",
     "maxLength": "{{field}} tidak boleh lebih dari {{max}} karakter"
+  },
+  "notification": {
+    "diaryEntry": {
+      "title": "Postingan Baru",
+      "body": "{{authorName}} memposting di \"{{diaryTitle}}\""
+    },
+    "capsuleUnlocked": {
+      "title": "Kapsul Dibuka",
+      "body": "{{unlockerName}} membuka \"{{capsuleTitle}}\""
+    }
   }
 }

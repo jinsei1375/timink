@@ -274,7 +274,7 @@ class CapsuleService {
   /**
    * タイムカプセルを開封
    */
-  async unlockCapsule(capsuleId: string): Promise<void> {
+  async unlockCapsule(capsuleId: string, unlockerId: string): Promise<void> {
     const canUnlock = await this.canUnlockCapsule(capsuleId);
 
     if (!canUnlock) {
@@ -291,6 +291,40 @@ class CapsuleService {
 
     if (error) {
       console.error('Error unlocking capsule:', error);
+      throw error;
+    }
+
+    // 通知を送信（非同期で実行、エラーは無視）
+    this.sendUnlockNotification(capsuleId, unlockerId).catch((err) =>
+      console.error('開封通知送信エラー:', err)
+    );
+  }
+
+  /**
+   * タイムカプセル開封通知を全メンバーに送信
+   */
+  private async sendUnlockNotification(capsuleId: string, unlockerId: string): Promise<void> {
+    try {
+      // カプセル情報と開封者情報を取得
+      const [capsule, unlocker] = await Promise.all([
+        this.getCapsuleById(capsuleId),
+        supabase.from('profiles').select('display_name').eq('id', unlockerId).single(),
+      ]);
+
+      if (!capsule || !unlocker.data) {
+        console.error('カプセルまたは開封者情報が見つかりません');
+        return;
+      }
+
+      const { NotificationService } = await import('./notificationService');
+      await NotificationService.sendCapsuleUnlockNotification(
+        capsuleId,
+        unlockerId,
+        unlocker.data.display_name || 'Someone',
+        capsule.title
+      );
+    } catch (error) {
+      console.error('開封通知の送信に失敗:', error);
       throw error;
     }
   }

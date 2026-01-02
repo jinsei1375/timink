@@ -83,11 +83,11 @@ export default function CapsuleDetailScreen() {
   }, [subscribe, loadData]);
 
   const handleUnlock = async () => {
-    if (!capsule) return;
+    if (!capsule || !user?.id) return;
 
     try {
       setUnlocking(true);
-      await capsuleService.unlockCapsule(capsule.id);
+      await capsuleService.unlockCapsule(capsule.id, user.id);
       emit(RefreshEvent.CAPSULE_UNLOCKED);
       Alert.alert('開封完了', 'タイムカプセルを開封しました！');
     } catch (error) {

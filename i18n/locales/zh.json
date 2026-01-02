@@ -293,5 +293,15 @@
     "required": "{{field}}是必填项",
     "minLength": "{{field}}必须至少{{min}}个字符",
     "maxLength": "{{field}}不能超过{{max}}个字符"
+  },
+  "notification": {
+    "diaryEntry": {
+      "title": "新帖子",
+      "body": "{{authorName}}在\"{{diaryTitle}}\"中发帖了"
+    },
+    "capsuleUnlocked": {
+      "title": "时间胶囊已解锁",
+      "body": "{{unlockerName}}解锁了\"{{capsuleTitle}}\""
+    }
   }
 }

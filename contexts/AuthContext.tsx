@@ -68,6 +68,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile = await AuthService.getProfile(user.id);
       }
 
+      // プロフィールから言語設定を読み込み、AsyncStorageと同期
+      if (profile?.preferred_language) {
+        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+        const i18n = (await import('@/i18n')).default;
+        await AsyncStorage.setItem('app_language', profile.preferred_language);
+        i18n.changeLanguage(profile.preferred_language);
+      }
+
       // プッシュ通知トークンを登録
       try {
         const expoPushToken = await NotificationService.registerForPushNotificationsAsync();

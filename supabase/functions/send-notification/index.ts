@@ -1,12 +1,17 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getNotificationMessage } from '../_shared/notifications.ts';
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
 
 interface NotificationRequest {
-  diaryId: string;
-  authorId: string;
-  authorName: string;
-  diaryTitle: string;
+  diaryId?: string;
+  authorId?: string;
+  authorName?: string;
+  diaryTitle?: string;
+  capsuleId?: string;
+  unlockerId?: string;
+  unlockerName?: string;
+  capsuleTitle?: string;
   type: string;
 }
 
@@ -23,11 +28,28 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { diaryId, authorId, authorName, diaryTitle, type }: NotificationRequest =
-      await req.json();
+    const {
+      diaryId,
+      authorId,
+      authorName,
+      diaryTitle,
+      capsuleId,
+      unlockerId,
+      unlockerName,
+      capsuleTitle,
+      type,
+    }: NotificationRequest = await req.json();
 
-    if (!diaryId || !authorId) {
-      throw new Error(`Missing required fields: diaryId=${diaryId}, authorId=${authorId}`);
+    if (type === 'diary_entry' && (!diaryId || !authorId)) {
+      throw new Error(
+        `Missing required fields for diary_entry: diaryId=${diaryId}, authorId=${authorId}`
+      );
+    }
+
+    if (type === 'capsule_unlocked' && (!capsuleId || !unlockerId)) {
+      throw new Error(
+        `Missing required fields for capsule_unlocked: capsuleId=${capsuleId}, unlockerId=${unlockerId}`
+      );
     }
 
     // Supabaseクライアントを作成
@@ -46,24 +68,72 @@ Deno.serve(async (req) => {
       throw new Error('認証が必要です');
     }
 
-    // 日記のメンバーを取得（投稿者以外）
-    const { data: members, error: membersError } = await supabase
-      .from('diary_members')
-      .select('profile_id, profiles!inner(expo_push_token)')
-      .eq('diary_id', diaryId)
-      .neq('profile_id', authorId);
+    // メンバーを取得（投稿者/開封者以外）
+    let members;
+    let membersError;
+
+    if (type === 'diary_entry') {
+      const result = await supabase
+        .from('diary_members')
+        .select('profile_id, profiles!inner(expo_push_token, preferred_language)')
+        .eq('diary_id', diaryId!)
+        .neq('profile_id', authorId!);
+      members = result.data;
+      membersError = result.error;
+    } else if (type === 'capsule_unlocked') {
+      const result = await supabase
+        .from('capsule_members')
+        .select('user_id, profiles!inner(expo_push_token, preferred_language)')
+        .eq('capsule_id', capsuleId!)
+        .eq('status', 'active')
+        .neq('user_id', unlockerId!);
+      members = result.data;
+      membersError = result.error;
+    }
 
     console.log('通知対象メンバー:', members);
 
     if (membersError) throw membersError;
 
-    // Expo Push Tokenを収集
-    const expoPushTokens =
+    // メンバーごとの言語設定に応じた通知メッセージを生成
+    const messages =
       members
-        ?.map((m: any) => m.profiles?.expo_push_token)
-        .filter((token: string | null) => token !== null) || [];
+        ?.filter((m: any) => m.profiles?.expo_push_token)
+        .map((member: any) => {
+          const pushToken = member.profiles.expo_push_token;
+          const lang = member.profiles.preferred_language || 'en';
 
-    if (expoPushTokens.length === 0) {
+          let notificationMessage: { title: string; body: string };
+          let data: any;
+
+          if (type === 'diary_entry') {
+            notificationMessage = getNotificationMessage('diaryEntry', lang, {
+              authorName: authorName!,
+              diaryTitle: diaryTitle!,
+            });
+            data = { type, diaryId };
+          } else if (type === 'capsule_unlocked') {
+            notificationMessage = getNotificationMessage('capsuleUnlocked', lang, {
+              unlockerName: unlockerName!,
+              capsuleTitle: capsuleTitle!,
+            });
+            data = { type, capsuleId };
+          } else {
+            throw new Error(`Unknown notification type: ${type}`);
+          }
+
+          return {
+            to: pushToken,
+            sound: 'default',
+            title: notificationMessage.title,
+            body: notificationMessage.body,
+            data,
+            priority: 'high',
+            channelId: 'default',
+          };
+        }) || [];
+
+    if (messages.length === 0) {
       return new Response(
         JSON.stringify({ success: true, message: '通知対象のトークンがありません' }),
         {
@@ -71,20 +141,6 @@ Deno.serve(async (req) => {
         }
       );
     }
-
-    // Expo Push通知を送信
-    const messages = expoPushTokens.map((pushToken: string) => ({
-      to: pushToken,
-      sound: 'default',
-      title: '📖 新しい投稿',
-      body: `${authorName}さんが「${diaryTitle}」に投稿しました`,
-      data: {
-        type,
-        diaryId,
-      },
-      priority: 'high',
-      channelId: 'default',
-    }));
 
     const response = await fetch(EXPO_PUSH_URL, {
       method: 'POST',

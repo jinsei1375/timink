@@ -293,5 +293,15 @@
     "required": "{{field}} est obligatoire",
     "minLength": "{{field}} doit contenir au moins {{min}} caractères",
     "maxLength": "{{field}} ne doit pas dépasser {{max}} caractères"
+  },
+  "notification": {
+    "diaryEntry": {
+      "title": "Nouvelle publication",
+      "body": "{{authorName}} a publié dans \"{{diaryTitle}}\""
+    },
+    "capsuleUnlocked": {
+      "title": "Capsule déverrouillée",
+      "body": "{{unlockerName}} a déverrouillé \"{{capsuleTitle}}\""
+    }
   }
 }

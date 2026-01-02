@@ -135,4 +135,35 @@ export class NotificationService {
       // エラーが発生しても投稿処理は続行
     }
   }
+
+  /**
+   * タイムカプセル開封通知を送信
+   */
+  static async sendCapsuleUnlockNotification(
+    capsuleId: string,
+    unlockerId: string,
+    unlockerName: string,
+    capsuleTitle: string
+  ): Promise<void> {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-notification', {
+        body: {
+          capsuleId,
+          unlockerId,
+          unlockerName,
+          capsuleTitle,
+          type: 'capsule_unlocked',
+        },
+      });
+
+      if (error) {
+        console.error('カプセル開封通知エラー:', error);
+        throw error;
+      }
+
+      console.log('カプセル開封通知送信成功:', data);
+    } catch (error) {
+      console.error('カプセル開封通知エラー:', error);
+    }
+  }
 }

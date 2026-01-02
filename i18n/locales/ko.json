@@ -293,5 +293,15 @@
     "required": "{{field}}은(는) 필수 항목입니다",
     "minLength": "{{field}}은(는) 최소 {{min}}자 이상이어야 합니다",
     "maxLength": "{{field}}은(는) 최대 {{max}}자 이하여야 합니다"
+  },
+  "notification": {
+    "diaryEntry": {
+      "title": "새 게시물",
+      "body": "{{authorName}}님이 \"{{diaryTitle}}\"에 게시했습니다"
+    },
+    "capsuleUnlocked": {
+      "title": "캡슐이 열렸습니다",
+      "body": "{{unlockerName}}님이 \"{{capsuleTitle}}\"을(를) 열었습니다"
+    }
   }
 }

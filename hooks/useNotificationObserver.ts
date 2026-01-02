@@ -12,6 +12,8 @@ export function useNotificationObserver() {
 
       if (data.type === 'diary_entry' && data.diaryId) {
         router.push(`/diary/${data.diaryId}` as any);
+      } else if (data.type === 'capsule_unlocked' && data.capsuleId) {
+        router.push(`/capsule/${data.capsuleId}` as any);
       }
     }
   }, [response]);
